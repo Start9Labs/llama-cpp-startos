@@ -1,4 +1,9 @@
-// Here we define any constants or functions that are shared by multiple components
-// throughout the package codebase. This file will be unnecessary for many packages.
+export const apiPort = 8080
 
-export const uiPort = 80
+export const variant = (process.env.VARIANT || 'generic') as
+  | 'generic'
+  | 'nvidia'
+  | 'rocm'
+  | 'vulkan'
+
+export const isGpuVariant = variant !== 'generic'
