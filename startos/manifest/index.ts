@@ -61,20 +61,46 @@ export const manifest = setupManifest({
     start: null,
     stop: null,
   },
-  hardwareAcceleration: variant !== 'generic',
+  // generic is published, so hardwareAcceleration must be uniform across all
+  // variants — it lives in the registry's shared version metadata, and a
+  // mismatch (e.g. generic false vs the rest true) rejects publish.
+  hardwareAcceleration: true,
+  // Each variant needs a distinct hardware requirement, or variants sharing one
+  // (e.g. two with an empty requirement) collide on publish as a registry
+  // metadata mismatch. generic is the sole no-requirement fallback.
   hardwareRequirements: {
     device:
-      variant === 'rocm'
+      variant === 'nvidia'
         ? [
             {
-              class: 'display' as const,
+              class: 'display',
               product: null,
               vendor: null,
-              driver: 'amdgpu',
-              description: 'An AMD GPU',
+              driver: 'nvidia',
+              description: 'An NVIDIA GPU',
             },
           ]
-        : [],
+        : variant === 'rocm'
+          ? [
+              {
+                class: 'display',
+                product: null,
+                vendor: null,
+                driver: 'amdgpu',
+                description: 'An AMD GPU',
+              },
+            ]
+          : variant === 'vulkan'
+            ? [
+                {
+                  class: 'display',
+                  product: null,
+                  vendor: null,
+                  driver: 'i915',
+                  description: 'An Intel GPU',
+                },
+              ]
+            : [],
   },
   dependencies: {},
 })

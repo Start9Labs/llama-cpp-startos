@@ -36,12 +36,14 @@
 
 The package ships four variants, selected at build time via the `VARIANT` env var (driven by the `Makefile`):
 
-| Variant   | Image                                            | Arches       | Accelerator |
-| --------- | ------------------------------------------------ | ------------ | ----------- |
-| `generic` | `ghcr.io/ggml-org/llama.cpp:server`              | x86_64, aarch64 | CPU only |
-| `nvidia`  | `ghcr.io/ggml-org/llama.cpp:server-cuda`         | x86_64, aarch64 | CUDA (NVIDIA) |
-| `rocm`    | `ghcr.io/ggml-org/llama.cpp:server-rocm`         | x86_64       | ROCm (AMD) |
-| `vulkan`  | `ghcr.io/ggml-org/llama.cpp:server-vulkan`       | x86_64, aarch64 | Vulkan (cross-vendor GPU) |
+| Variant   | Image                                            | Arches       | Accelerator | Offered to GPU driver |
+| --------- | ------------------------------------------------ | ------------ | ----------- | --------------------- |
+| `generic` | `ghcr.io/ggml-org/llama.cpp:server`              | x86_64, aarch64 | CPU only | — (universal fallback) |
+| `nvidia`  | `ghcr.io/ggml-org/llama.cpp:server-cuda`         | x86_64, aarch64 | CUDA (NVIDIA) | `nvidia` |
+| `rocm`    | `ghcr.io/ggml-org/llama.cpp:server-rocm`         | x86_64       | ROCm (AMD) | `amdgpu` |
+| `vulkan`  | `ghcr.io/ggml-org/llama.cpp:server-vulkan`       | x86_64, aarch64 | Vulkan | `i915` (Intel) |
+
+All four variants publish under a single package version. Each declares a distinct `hardwareRequirements.device` (the host GPU's kernel driver), so StartOS serves each host the most specific variant its detected hardware satisfies — `nvidia`/`rocm`/`vulkan` for matching GPUs, and `generic` as the universal CPU fallback for everything else. Note that `vulkan` matches only Intel GPUs on the `i915` driver; newer Intel GPUs on the `xe` driver (and non-Intel Vulkan-only setups) fall back to `generic`.
 
 | Property     | Value                |
 | ------------ | -------------------- |
@@ -193,23 +195,28 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for build instructions and development wo
 
 ```yaml
 package_id: llama-cpp
-variants:
+hardware_acceleration: true
+variants: # all publish under one version; StartOS matches by detected GPU driver
   generic:
     image: ghcr.io/ggml-org/llama.cpp:server
     arch: [x86_64, aarch64]
     accel: cpu
+    gpu_driver: null # universal CPU fallback
   nvidia:
     image: ghcr.io/ggml-org/llama.cpp:server-cuda
     arch: [x86_64, aarch64]
     accel: cuda
+    gpu_driver: nvidia
   rocm:
     image: ghcr.io/ggml-org/llama.cpp:server-rocm
     arch: [x86_64]
     accel: rocm
+    gpu_driver: amdgpu
   vulkan:
     image: ghcr.io/ggml-org/llama.cpp:server-vulkan
     arch: [x86_64, aarch64]
     accel: vulkan
+    gpu_driver: i915 # Intel GPUs only
 volumes:
   main: /data
 ports:
