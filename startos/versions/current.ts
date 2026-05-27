@@ -1,6 +1,6 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
-export const v_1_0_9265_0 = VersionInfo.of({
+export const current = VersionInfo.of({
   version: '1.0.9265:0',
   releaseNotes: {
     en_US: 'Initial release of llama.cpp for StartOS (upstream b9265).',

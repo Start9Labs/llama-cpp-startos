@@ -35,6 +35,6 @@ If any variant returns `MANIFEST_UNKNOWN`, drop back one or two build numbers un
 ## Applying the bump
 
 1. Update `const upstreamBuild` in `startos/manifest/index.ts` to the new build tag (e.g. `'b9277'`).
-2. Bump `version` + `releaseNotes` in `startos/versions/v1.0.NNNN_M.ts` (and rename the file to match the new version, per the StartOS version-file convention).
+2. Bump `version` + `releaseNotes` in `startos/versions/current.ts`. Edit in place — the file name stays `current.ts`; spin off a new file only if the bump needs a migration.
 3. Skim the upstream commit range for breaking flag/server-API changes that might invalidate the presets in `startos/actions/presets.ts`. Build numbers are dense (dozens per day), so most bumps are uneventful — but `llama-server` does occasionally rename flags.
 4. Build and verify at least the `generic` variant: `make generic`.
