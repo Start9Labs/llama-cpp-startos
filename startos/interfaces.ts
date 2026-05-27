@@ -1,16 +1,17 @@
 import { i18n } from './i18n'
 import { sdk } from './sdk'
-import { uiPort } from './utils'
+import { apiPort } from './utils'
 
 export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
-  const uiMulti = sdk.MultiHost.of(effects, 'ui-multi')
-  const uiMultiOrigin = await uiMulti.bindPort(uiPort, {
+  const apiMulti = sdk.MultiHost.of(effects, 'api-multi')
+  const apiMultiOrigin = await apiMulti.bindPort(apiPort, {
     protocol: 'http',
   })
-  const ui = sdk.createInterface(effects, {
-    name: i18n('Web UI'),
-    id: 'ui',
-    description: i18n('The web interface of Hello World'),
+
+  const api = sdk.createInterface(effects, {
+    name: i18n('llama.cpp Server'),
+    id: 'api',
+    description: i18n('OpenAI-compatible API and built-in chat UI'),
     type: 'ui',
     masked: false,
     schemeOverride: null,
@@ -19,7 +20,7 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
     query: {},
   })
 
-  const uiReceipt = await uiMultiOrigin.export([ui])
+  const apiReceipt = await apiMultiOrigin.export([api])
 
-  return [uiReceipt]
+  return [apiReceipt]
 })

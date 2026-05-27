@@ -15,16 +15,20 @@ See [Environment Setup](https://docs.start9.com/packaging/environment-setup.html
 ## Building
 
 ```bash
-npm ci    # install dependencies
-make      # build the universal .s9pk
+npm ci          # install dependencies
+make            # build all four variants (generic, nvidia, rocm, vulkan)
+make generic    # build just one variant
+make x86        # default variant, x86_64 only
 ```
+
+This package ships four image variants — `generic` (CPU), `nvidia` (CUDA), `rocm` (AMD), and `vulkan` (cross-vendor GPU) — selected at build time via `VARIANT=…`. The `Makefile` drives the fan-out.
 
 For a complete list of build options, see [Makefile](https://docs.start9.com/packaging/makefile.html).
 
 ## Updating the upstream version
 
 1. Apply the upstream bump per [UPDATING.md](./UPDATING.md).
-2. Update `version` and `releaseNotes` in the file under `startos/versions/`, renaming it to the new version string. A _new_ version file is only needed when the bump requires a migration, or when you want the old release notes preserved in git history — see [Versions](https://docs.start9.com/packaging/versions.html).
+2. Update `version` and `releaseNotes` in `startos/versions/current.ts` — the latest version always lives in that file, so an in-place edit is all most bumps need. A new file is spun off only when the bump requires a migration — see [Versions](https://docs.start9.com/packaging/versions.html).
 
 ## CI/CD
 

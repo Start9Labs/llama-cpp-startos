@@ -1,16 +1,16 @@
 <p align="center">
-  <img src="icon.svg" alt="Hello World Logo" width="21%">
+  <img src="icon.svg" alt="llama.cpp Logo" width="21%">
 </p>
 
-# Hello World on StartOS
+# llama.cpp on StartOS
 
-> **Upstream repo:** <https://github.com/Start9Labs/hello-world>
+> **Upstream repo:** <https://github.com/ggml-org/llama.cpp>
+>
+> **Upstream `llama-server` docs:** <https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md>
+>
+> Everything not listed here behaves the same as upstream `llama-server`. If a flag, endpoint, or behavior is not mentioned in this document, upstream documentation is accurate and fully applicable.
 
-A minimal reference service for StartOS. It displays a simple web page — nothing more. Use [this repository](https://github.com/Start9Labs/hello-world-startos) as a template when packaging a new service for StartOS.
-
-## Getting Started
-
-To learn how to use this template to create your own StartOS service package, see the [Packaging Guide](https://docs.start9.com/packaging).
+[llama.cpp](https://github.com/ggml-org/llama.cpp) is a high-performance C/C++ runtime for large language models in GGUF format. This package wraps its built-in HTTP server (`llama-server`), which exposes an OpenAI-compatible API and a small in-browser chat UI on the same port.
 
 ---
 
@@ -22,9 +22,9 @@ To learn how to use this template to create your own StartOS service package, se
 - [Configuration Management](#configuration-management)
 - [Network Access and Interfaces](#network-access-and-interfaces)
 - [Actions (StartOS UI)](#actions-startos-ui)
+- [Dependencies](#dependencies)
 - [Backups and Restore](#backups-and-restore)
 - [Health Checks](#health-checks)
-- [Dependencies](#dependencies)
 - [Limitations and Differences](#limitations-and-differences)
 - [What Is Unchanged from Upstream](#what-is-unchanged-from-upstream)
 - [Contributing](#contributing)
@@ -34,70 +34,106 @@ To learn how to use this template to create your own StartOS service package, se
 
 ## Image and Container Runtime
 
-| Property      | Value                                  |
-| ------------- | -------------------------------------- |
-| Image         | `ghcr.io/start9labs/hello-world`       |
-| Architectures | x86_64, aarch64, riscv64               |
-| Command       | `hello-world`                          |
+The package ships four variants, selected at build time via the `VARIANT` env var (driven by the `Makefile`):
+
+| Variant   | Image                                            | Arches       | Accelerator |
+| --------- | ------------------------------------------------ | ------------ | ----------- |
+| `generic` | `ghcr.io/ggml-org/llama.cpp:server`              | x86_64, aarch64 | CPU only |
+| `nvidia`  | `ghcr.io/ggml-org/llama.cpp:server-cuda`         | x86_64, aarch64 | CUDA (NVIDIA) |
+| `rocm`    | `ghcr.io/ggml-org/llama.cpp:server-rocm`         | x86_64       | ROCm (AMD) |
+| `vulkan`  | `ghcr.io/ggml-org/llama.cpp:server-vulkan`       | x86_64, aarch64 | Vulkan (cross-vendor GPU) |
+
+| Property     | Value                |
+| ------------ | -------------------- |
+| Entrypoint   | `/app/llama-server`  |
+| Working dir  | `/app`               |
+| Default port | 8080                 |
 
 ---
 
 ## Volume and Data Layout
 
-| Volume | Mount Point | Purpose         |
-| ------ | ----------- | --------------- |
-| `main` | `/data`     | Persistent data |
+| Volume | Mount Point | Purpose                                         |
+| ------ | ----------- | ----------------------------------------------- |
+| `main` | `/data`     | `store.json` (API key + serve args) and `models/` (GGUF cache) |
+
+The container runs with `LLAMA_CACHE=/data/models` and `HF_HOME=/data/huggingface`, so all `-hf <repo>` downloads land on the persistent volume.
 
 ---
 
 ## Installation and First-Run Flow
 
-No special setup. Install and start — the web page is immediately available.
+| Step | StartOS |
+| ---- | ------- |
+| Install | Marketplace install or sideload `.s9pk` |
+| First-run tasks | Two `critical` tasks are auto-created: **Get API Credentials** (retrieve auto-generated key) and **Set Model** (choose what to serve) |
+| Start service | After **Set Model** has been run; until then the daemon idles |
+| Pull the model | Automatic on first start (cached on the `main` volume) |
+
+Until **Set Model** has been run, the daemon stays in an idle (`sleep infinity`) state and the API port is closed — the health check reports "No model selected." Once a model is selected, llama-server is restarted with the chosen serve arguments.
 
 ---
 
 ## Configuration Management
 
-No configurable settings. The service runs with no user-facing configuration.
+Configuration is stored at `/data/store.json` and managed via the **Set Model** action:
+
+```json
+{
+  "apiKey": "<32-char auto-generated key>",
+  "serveArgs": ["-hf", "unsloth/Qwen2.5-7B-Instruct-GGUF:Q4_K_M", "-c", "8192", "-ngl", "999"]
+}
+```
+
+`serveArgs` is the exact list of arguments appended after `/app/llama-server`. The daemon adds `--host 0.0.0.0`, `--port 8080`, and `--api-key <apiKey>` at runtime.
+
+**Curated presets:** the Set Model action surfaces a hardware-tier-aware list of GGUF presets and disables ones too large for the detected memory:
+
+| Preset                            | Repo (`-hf`)                                              | Min memory |
+| --------------------------------- | --------------------------------------------------------- | ---------- |
+| Llama 3.2 1B Instruct             | `unsloth/Llama-3.2-1B-Instruct-GGUF:Q4_K_M`               | 2 GB       |
+| Llama 3.2 3B Instruct             | `unsloth/Llama-3.2-3B-Instruct-GGUF:Q4_K_M`               | 4 GB       |
+| Qwen2.5 7B Instruct               | `unsloth/Qwen2.5-7B-Instruct-GGUF:Q4_K_M`                 | 6 GB       |
+| Llama 3.1 8B Instruct             | `unsloth/Meta-Llama-3.1-8B-Instruct-GGUF:Q4_K_M`          | 8 GB       |
+| Qwen2.5 14B Instruct              | `unsloth/Qwen2.5-14B-Instruct-GGUF:Q4_K_M`                | 12 GB      |
+| Mistral Small 3.2 24B Instruct    | `unsloth/Mistral-Small-3.2-24B-Instruct-2506-GGUF:Q4_K_M` | 18 GB      |
+| Qwen3 30B-A3B Instruct            | `unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:Q4_K_M`         | 22 GB      |
+| Qwen2.5 32B Instruct              | `unsloth/Qwen2.5-32B-Instruct-GGUF:Q4_K_M`                | 24 GB      |
+| Llama 3.3 70B Instruct            | `unsloth/Llama-3.3-70B-Instruct-GGUF:Q4_K_M`              | 48 GB      |
+
+The **Custom** variant accepts a HuggingFace repo, optional filename, context size, GPU layer count, and extra `llama-server` flags. For settings that can't be expressed cleanly via the form (quoted JSON, multi-word strings), edit `store.json` directly.
 
 ---
 
 ## Network Access and Interfaces
 
-| Interface | Port | Protocol | Purpose              |
-| --------- | ---- | -------- | -------------------- |
-| Web UI    | 80   | HTTP     | Hello World web page |
+| Interface | Port | Protocol | Type | Purpose |
+| --------- | ---- | -------- | ---- | ------- |
+| llama.cpp Server | 8080 | HTTP | `ui` | Built-in chat UI + OpenAI-compatible API |
 
-**Access methods:**
+The chat UI and the API share a single port. Access methods (StartOS 0.4.x): LAN IP, `<hostname>.local`, Tor `.onion`, and custom domains if configured. All OpenAI-compatible clients should use base URL `<interface-url>/v1` and pass the API key as `Authorization: Bearer <key>`.
 
-- LAN IP with unique port
-- `<hostname>.local` with unique port
-- Tor `.onion` address
-- Custom domains (if configured)
+Selected upstream endpoints:
+
+| Endpoint            | Method | Purpose |
+| ------------------- | ------ | ------- |
+| `/v1/chat/completions` | POST | OpenAI-compatible chat |
+| `/v1/completions`      | POST | OpenAI-compatible text completion |
+| `/v1/embeddings`       | POST | Embeddings (when the loaded model supports them) |
+| `/health`              | GET  | Health probe |
+| `/props`               | GET  | Loaded model info |
+
+The full surface area is documented in upstream `tools/server/README.md`.
 
 ---
 
 ## Actions (StartOS UI)
 
-None.
-
----
-
-## Backups and Restore
-
-**Included in backup:**
-
-- `main` volume
-
-**Restore behavior:** Volume is fully restored before the service starts.
-
----
-
-## Health Checks
-
-| Check         | Method              | Messages                                                           |
-| ------------- | ------------------- | ------------------------------------------------------------------ |
-| Web Interface | Port listening (80) | Success: "The web interface is ready" / Error: "The web interface is not ready" |
+| Action | Purpose |
+| ------ | ------- |
+| **Set Model** | Choose a curated preset (with hardware-tier-aware availability) or a custom HuggingFace GGUF. Writes `serveArgs` to `store.json` and restarts the daemon. |
+| **Get API Credentials** | Return the auto-generated API key. Surfaced once on install via a `critical` task. |
+| **Delete Model Cache** | Remove a specific filename from `/data/models` to reclaim disk space. |
 
 ---
 
@@ -107,35 +143,84 @@ None.
 
 ---
 
+## Backups and Restore
+
+**Included in backup:**
+
+- `main` volume — `store.json` *and* all cached GGUF weights under `models/`.
+
+**Restore behavior:**
+
+- API key, serve args, and any locally cached models are restored verbatim. No reconfiguration needed.
+
+Backups can be very large depending on how many models you've cached — a single 70B Q4 file is ~40 GB.
+
+---
+
+## Health Checks
+
+| Check        | Method                  | Grace period | Messages |
+| ------------ | ----------------------- | ------------ | -------- |
+| llama.cpp API | Port listening on 8080 | 60 minutes (cold-cache model downloads) | "The llama.cpp API is ready" / "The llama.cpp API is not ready" or "No model selected. Run the \"Set Model\" action." |
+
+---
+
 ## Limitations and Differences
 
-1. **No meaningful functionality** — this is a reference/template package only
+1. **One model per process.** llama-server holds a single GGUF in memory. To switch models, run **Set Model** again — the service restarts with the new weights.
+2. **Custom-action arg splitting.** The Custom variant's `Extra arguments` field is split on whitespace, so JSON values with quoted spaces will not survive — edit `store.json` directly for those.
+3. **Hardware-tier detection is best-effort.** GPU memory is read from `nvidia-smi` / `rocm-smi`; on Vulkan and unsupported topologies, the preset filter falls back to total system RAM as a memory budget.
+4. **Variants are independent installs.** Switching from e.g. `generic` to `nvidia` is an uninstall + reinstall, not an in-place change; cached models on the `main` volume can be restored from backup.
 
 ---
 
 ## What Is Unchanged from Upstream
 
-The service is identical to upstream. There are no modifications.
+- The full `llama-server` HTTP API and built-in chat UI.
+- All `llama-server` CLI flags — anything not consumed by the package wrapper passes straight through (via the Custom variant's extra args).
+- HuggingFace `-hf` model downloads and the `LLAMA_CACHE` layout.
+- GGUF model support, embedding endpoints, OpenAI-compatible response shapes, and tool-call formats.
 
 ---
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for build instructions and development workflow.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for build instructions and development workflow, and [UPDATING.md](UPDATING.md) for the upstream-bump procedure.
 
 ---
 
 ## Quick Reference for AI Consumers
 
 ```yaml
-package_id: hello-world
-image: ghcr.io/start9labs/hello-world
-architectures: [x86_64, aarch64, riscv64]
+package_id: llama-cpp
+variants:
+  generic:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    arch: [x86_64, aarch64]
+    accel: cpu
+  nvidia:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    arch: [x86_64, aarch64]
+    accel: cuda
+  rocm:
+    image: ghcr.io/ggml-org/llama.cpp:server-rocm
+    arch: [x86_64]
+    accel: rocm
+  vulkan:
+    image: ghcr.io/ggml-org/llama.cpp:server-vulkan
+    arch: [x86_64, aarch64]
+    accel: vulkan
 volumes:
   main: /data
 ports:
-  ui: 80
+  api_and_ui: 8080
+env:
+  LLAMA_CACHE: /data/models
+  HF_HOME: /data/huggingface
 dependencies: none
-startos_managed_env_vars: none
-actions: none
+startos_managed_args: ["--host 0.0.0.0", "--port 8080", "--api-key <stored>"]
+actions:
+  - set-model
+  - get-api-credentials
+  - delete-model-cache
 ```
