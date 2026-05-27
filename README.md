@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="icon.svg" alt="llama.cpp Logo" width="21%">
+  <img src="icon.png" alt="llama.cpp Logo" width="21%">
 </p>
 
 # llama.cpp on StartOS
@@ -36,27 +36,27 @@
 
 The package ships four variants, selected at build time via the `VARIANT` env var (driven by the `Makefile`):
 
-| Variant   | Image                                            | Arches       | Accelerator | Offered to GPU driver |
-| --------- | ------------------------------------------------ | ------------ | ----------- | --------------------- |
-| `generic` | `ghcr.io/ggml-org/llama.cpp:server`              | x86_64, aarch64 | CPU only | — (universal fallback) |
-| `nvidia`  | `ghcr.io/ggml-org/llama.cpp:server-cuda`         | x86_64, aarch64 | CUDA (NVIDIA) | `nvidia` |
-| `rocm`    | `ghcr.io/ggml-org/llama.cpp:server-rocm`         | x86_64       | ROCm (AMD) | `amdgpu` |
-| `vulkan`  | `ghcr.io/ggml-org/llama.cpp:server-vulkan`       | x86_64, aarch64 | Vulkan | `i915` (Intel) |
+| Variant   | Image                                      | Arches          | Accelerator   | Offered to GPU driver  |
+| --------- | ------------------------------------------ | --------------- | ------------- | ---------------------- |
+| `generic` | `ghcr.io/ggml-org/llama.cpp:server`        | x86_64, aarch64 | CPU only      | — (universal fallback) |
+| `nvidia`  | `ghcr.io/ggml-org/llama.cpp:server-cuda`   | x86_64, aarch64 | CUDA (NVIDIA) | `nvidia`               |
+| `rocm`    | `ghcr.io/ggml-org/llama.cpp:server-rocm`   | x86_64          | ROCm (AMD)    | `amdgpu`               |
+| `vulkan`  | `ghcr.io/ggml-org/llama.cpp:server-vulkan` | x86_64, aarch64 | Vulkan        | `i915` (Intel)         |
 
 All four variants publish under a single package version. Each declares a distinct `hardwareRequirements.device` (the host GPU's kernel driver), so StartOS serves each host the most specific variant its detected hardware satisfies — `nvidia`/`rocm`/`vulkan` for matching GPUs, and `generic` as the universal CPU fallback for everything else. Note that `vulkan` matches only Intel GPUs on the `i915` driver; newer Intel GPUs on the `xe` driver (and non-Intel Vulkan-only setups) fall back to `generic`.
 
-| Property     | Value                |
-| ------------ | -------------------- |
-| Entrypoint   | `/app/llama-server`  |
-| Working dir  | `/app`               |
-| Default port | 8080                 |
+| Property     | Value               |
+| ------------ | ------------------- |
+| Entrypoint   | `/app/llama-server` |
+| Working dir  | `/app`              |
+| Default port | 8080                |
 
 ---
 
 ## Volume and Data Layout
 
-| Volume | Mount Point | Purpose                                         |
-| ------ | ----------- | ----------------------------------------------- |
+| Volume | Mount Point | Purpose                                                        |
+| ------ | ----------- | -------------------------------------------------------------- |
 | `main` | `/data`     | `store.json` (API key + serve args) and `models/` (GGUF cache) |
 
 The container runs with `LLAMA_CACHE=/data/models` and `HF_HOME=/data/huggingface`, so all `-hf <repo>` downloads land on the persistent volume.
@@ -65,12 +65,12 @@ The container runs with `LLAMA_CACHE=/data/models` and `HF_HOME=/data/huggingfac
 
 ## Installation and First-Run Flow
 
-| Step | StartOS |
-| ---- | ------- |
-| Install | Marketplace install or sideload `.s9pk` |
+| Step            | StartOS                                                                                                                               |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Install         | Marketplace install or sideload `.s9pk`                                                                                               |
 | First-run tasks | Two `critical` tasks are auto-created: **Get API Credentials** (retrieve auto-generated key) and **Set Model** (choose what to serve) |
-| Start service | After **Set Model** has been run; until then the daemon idles |
-| Pull the model | Automatic on first start (cached on the `main` volume) |
+| Start service   | After **Set Model** has been run; until then the daemon idles                                                                         |
+| Pull the model  | Automatic on first start (cached on the `main` volume)                                                                                |
 
 Until **Set Model** has been run, the daemon stays in an idle (`sleep infinity`) state and the API port is closed — the health check reports "No model selected." Once a model is selected, llama-server is restarted with the chosen serve arguments.
 
@@ -83,7 +83,14 @@ Configuration is stored at `/data/store.json` and managed via the **Set Model** 
 ```json
 {
   "apiKey": "<32-char auto-generated key>",
-  "serveArgs": ["-hf", "unsloth/Qwen2.5-7B-Instruct-GGUF:Q4_K_M", "-c", "8192", "-ngl", "999"]
+  "serveArgs": [
+    "-hf",
+    "unsloth/Qwen2.5-7B-Instruct-GGUF:Q4_K_M",
+    "-c",
+    "8192",
+    "-ngl",
+    "999"
+  ]
 }
 ```
 
@@ -91,17 +98,17 @@ Configuration is stored at `/data/store.json` and managed via the **Set Model** 
 
 **Curated presets:** the Set Model action surfaces a hardware-tier-aware list of GGUF presets and disables ones too large for the detected memory:
 
-| Preset                            | Repo (`-hf`)                                              | Min memory |
-| --------------------------------- | --------------------------------------------------------- | ---------- |
-| Llama 3.2 1B Instruct             | `unsloth/Llama-3.2-1B-Instruct-GGUF:Q4_K_M`               | 2 GB       |
-| Llama 3.2 3B Instruct             | `unsloth/Llama-3.2-3B-Instruct-GGUF:Q4_K_M`               | 4 GB       |
-| Qwen2.5 7B Instruct               | `unsloth/Qwen2.5-7B-Instruct-GGUF:Q4_K_M`                 | 6 GB       |
-| Llama 3.1 8B Instruct             | `unsloth/Meta-Llama-3.1-8B-Instruct-GGUF:Q4_K_M`          | 8 GB       |
-| Qwen2.5 14B Instruct              | `unsloth/Qwen2.5-14B-Instruct-GGUF:Q4_K_M`                | 12 GB      |
-| Mistral Small 3.2 24B Instruct    | `unsloth/Mistral-Small-3.2-24B-Instruct-2506-GGUF:Q4_K_M` | 18 GB      |
-| Qwen3 30B-A3B Instruct            | `unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:Q4_K_M`         | 22 GB      |
-| Qwen2.5 32B Instruct              | `unsloth/Qwen2.5-32B-Instruct-GGUF:Q4_K_M`                | 24 GB      |
-| Llama 3.3 70B Instruct            | `unsloth/Llama-3.3-70B-Instruct-GGUF:Q4_K_M`              | 48 GB      |
+| Preset                         | Repo (`-hf`)                                              | Min memory |
+| ------------------------------ | --------------------------------------------------------- | ---------- |
+| Llama 3.2 1B Instruct          | `unsloth/Llama-3.2-1B-Instruct-GGUF:Q4_K_M`               | 2 GB       |
+| Llama 3.2 3B Instruct          | `unsloth/Llama-3.2-3B-Instruct-GGUF:Q4_K_M`               | 4 GB       |
+| Qwen2.5 7B Instruct            | `unsloth/Qwen2.5-7B-Instruct-GGUF:Q4_K_M`                 | 6 GB       |
+| Llama 3.1 8B Instruct          | `unsloth/Meta-Llama-3.1-8B-Instruct-GGUF:Q4_K_M`          | 8 GB       |
+| Qwen2.5 14B Instruct           | `unsloth/Qwen2.5-14B-Instruct-GGUF:Q4_K_M`                | 12 GB      |
+| Mistral Small 3.2 24B Instruct | `unsloth/Mistral-Small-3.2-24B-Instruct-2506-GGUF:Q4_K_M` | 18 GB      |
+| Qwen3 30B-A3B Instruct         | `unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:Q4_K_M`         | 22 GB      |
+| Qwen2.5 32B Instruct           | `unsloth/Qwen2.5-32B-Instruct-GGUF:Q4_K_M`                | 24 GB      |
+| Llama 3.3 70B Instruct         | `unsloth/Llama-3.3-70B-Instruct-GGUF:Q4_K_M`              | 48 GB      |
 
 The **Custom** variant accepts a HuggingFace repo, optional filename, context size, GPU layer count, and extra `llama-server` flags. For settings that can't be expressed cleanly via the form (quoted JSON, multi-word strings), edit `store.json` directly.
 
@@ -109,21 +116,21 @@ The **Custom** variant accepts a HuggingFace repo, optional filename, context si
 
 ## Network Access and Interfaces
 
-| Interface | Port | Protocol | Type | Purpose |
-| --------- | ---- | -------- | ---- | ------- |
-| llama.cpp Server | 8080 | HTTP | `ui` | Built-in chat UI + OpenAI-compatible API |
+| Interface        | Port | Protocol | Type | Purpose                                  |
+| ---------------- | ---- | -------- | ---- | ---------------------------------------- |
+| llama.cpp Server | 8080 | HTTP     | `ui` | Built-in chat UI + OpenAI-compatible API |
 
 The chat UI and the API share a single port. Access methods (StartOS 0.4.x): LAN IP, `<hostname>.local`, Tor `.onion`, and custom domains if configured. All OpenAI-compatible clients should use base URL `<interface-url>/v1` and pass the API key as `Authorization: Bearer <key>`.
 
 Selected upstream endpoints:
 
-| Endpoint            | Method | Purpose |
-| ------------------- | ------ | ------- |
-| `/v1/chat/completions` | POST | OpenAI-compatible chat |
-| `/v1/completions`      | POST | OpenAI-compatible text completion |
-| `/v1/embeddings`       | POST | Embeddings (when the loaded model supports them) |
-| `/health`              | GET  | Health probe |
-| `/props`               | GET  | Loaded model info |
+| Endpoint               | Method | Purpose                                          |
+| ---------------------- | ------ | ------------------------------------------------ |
+| `/v1/chat/completions` | POST   | OpenAI-compatible chat                           |
+| `/v1/completions`      | POST   | OpenAI-compatible text completion                |
+| `/v1/embeddings`       | POST   | Embeddings (when the loaded model supports them) |
+| `/health`              | GET    | Health probe                                     |
+| `/props`               | GET    | Loaded model info                                |
 
 The full surface area is documented in upstream `tools/server/README.md`.
 
@@ -131,11 +138,11 @@ The full surface area is documented in upstream `tools/server/README.md`.
 
 ## Actions (StartOS UI)
 
-| Action | Purpose |
-| ------ | ------- |
-| **Set Model** | Choose a curated preset (with hardware-tier-aware availability) or a custom HuggingFace GGUF. Writes `serveArgs` to `store.json` and restarts the daemon. |
-| **Get API Credentials** | Return the auto-generated API key. Surfaced once on install via a `critical` task. |
-| **Delete Model Cache** | Remove a specific filename from `/data/models` to reclaim disk space. |
+| Action                  | Purpose                                                                                                                                                   |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Set Model**           | Choose a curated preset (with hardware-tier-aware availability) or a custom HuggingFace GGUF. Writes `serveArgs` to `store.json` and restarts the daemon. |
+| **Get API Credentials** | Return the auto-generated API key. Surfaced once on install via a `critical` task.                                                                        |
+| **Delete Model Cache**  | Remove a specific filename from `/data/models` to reclaim disk space.                                                                                     |
 
 ---
 
@@ -149,7 +156,7 @@ None.
 
 **Included in backup:**
 
-- `main` volume — `store.json` *and* all cached GGUF weights under `models/`.
+- `main` volume — `store.json` _and_ all cached GGUF weights under `models/`.
 
 **Restore behavior:**
 
@@ -161,8 +168,8 @@ Backups can be very large depending on how many models you've cached — a singl
 
 ## Health Checks
 
-| Check        | Method                  | Grace period | Messages |
-| ------------ | ----------------------- | ------------ | -------- |
+| Check         | Method                 | Grace period                            | Messages                                                                                                              |
+| ------------- | ---------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | llama.cpp API | Port listening on 8080 | 60 minutes (cold-cache model downloads) | "The llama.cpp API is ready" / "The llama.cpp API is not ready" or "No model selected. Run the \"Set Model\" action." |
 
 ---
@@ -225,7 +232,7 @@ env:
   LLAMA_CACHE: /data/models
   HF_HOME: /data/huggingface
 dependencies: none
-startos_managed_args: ["--host 0.0.0.0", "--port 8080", "--api-key <stored>"]
+startos_managed_args: ['--host 0.0.0.0', '--port 8080', '--api-key <stored>']
 actions:
   - set-model
   - get-api-credentials
