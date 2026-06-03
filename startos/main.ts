@@ -1,14 +1,14 @@
 import { i18n } from './i18n'
 import { sdk } from './sdk'
 import { storeJson } from './fileModels/store.json'
+import { credentialsJson } from './fileModels/credentials.json'
 import { apiPort } from './utils'
 
 export const main = sdk.setupMain(async ({ effects }) => {
   console.info(i18n('Starting llama.cpp!'))
 
-  const store = await storeJson.read((s) => s).const(effects)
-  const serveArgs = store?.serveArgs
-  const apiKey = store?.apiKey
+  const serveArgs = await storeJson.read((s) => s?.serveArgs).const(effects)
+  const apiKey = await credentialsJson.read((c) => c?.apiKey).const(effects)
 
   const subcontainer = await sdk.SubContainer.of(
     effects,

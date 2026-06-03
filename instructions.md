@@ -9,16 +9,17 @@
 
 - An OpenAI-compatible HTTP API at `<your-interface-url>/v1`, serving one GGUF model at a time.
 - The upstream chat UI at the same URL — open the interface in a browser to chat without setting up a client.
-- An auto-generated API key that external clients use to authenticate.
+- An auto-generated API key that external clients use to authenticate. Other StartOS AI apps that depend on llama.cpp (such as Open WebUI) can read it automatically, so connecting them is a one-click affair — no copy-paste.
 - Curated GGUF presets, plus a Custom option that accepts any HuggingFace GGUF repo.
 - Persistent model cache on the package volume — downloads happen once and survive restarts and backups.
 
 ## Getting set up
 
-Two tasks appear on the dashboard immediately after install. Run them in order:
+A **Set Model** task appears on the dashboard whenever no model is selected (so always on a fresh install):
 
-1. **Get API Credentials** — copies the API key. Save it; you'll need it for every external client. You can re-open this action any time.
-2. **Set Model** — choose what llama.cpp serves. The form shows curated presets and disables ones too large for the detected memory. If none of the presets fit, pick **Custom** and paste a HuggingFace repo such as `unsloth/Qwen2.5-7B-Instruct-GGUF:Q4_K_M`. On a GPU variant, leave `GPU layers` at 999 to offload everything; on the CPU-only `generic` variant the field is ignored.
+1. **Set Model** — choose what llama.cpp serves. The form shows curated presets and disables ones too large for the detected memory. If none of the presets fit, pick **Custom** and paste a HuggingFace repo such as `unsloth/Qwen2.5-7B-Instruct-GGUF:Q4_K_M`. On a GPU variant, leave `GPU layers` at 999 to offload everything; on the CPU-only `generic` variant the field is ignored.
+
+Your API key is generated automatically — grab it from the **Get API Credentials** action whenever you connect a client; it isn't a required setup step.
 
 The service starts as soon as a model is selected. The first launch downloads weights — expect several gigabytes and a few minutes (or longer over a slow link) before the API answers. Subsequent restarts are fast.
 

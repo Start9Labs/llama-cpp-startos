@@ -1,5 +1,5 @@
 import { sdk } from '../sdk'
-import { storeJson } from '../fileModels/store.json'
+import { credentialsJson } from '../fileModels/credentials.json'
 import { i18n } from '../i18n'
 
 export const getApiCredentials = sdk.Action.withoutInput(
@@ -17,7 +17,7 @@ export const getApiCredentials = sdk.Action.withoutInput(
   }),
 
   async ({ effects }) => {
-    const store = await storeJson.read((s) => s).once()
+    const apiKey = await credentialsJson.read((c) => c?.apiKey).once()
 
     return {
       version: '1' as const,
@@ -31,7 +31,7 @@ export const getApiCredentials = sdk.Action.withoutInput(
             type: 'single' as const,
             name: 'API Key',
             description: null,
-            value: store?.apiKey ?? 'UNKNOWN',
+            value: apiKey ?? 'UNKNOWN',
             masked: true,
             copyable: true,
             qr: false,

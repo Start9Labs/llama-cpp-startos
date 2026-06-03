@@ -55,9 +55,10 @@ All four variants publish under a single package version. Each declares a distin
 
 ## Volume and Data Layout
 
-| Volume | Mount Point | Purpose                                                        |
-| ------ | ----------- | -------------------------------------------------------------- |
-| `main` | `/data`     | `store.json` (API key + serve args) and `models/` (GGUF cache) |
+| Volume   | Mount Point | Purpose                                                                                  |
+| -------- | ----------- | --------------------------------------------------------------------------------------- |
+| `main`   | `/data`     | `store.json` (serve args) and `models/` (GGUF cache)                                     |
+| `public` | —           | `credentials.json` (API key) — readable by dependent services for automatic connection  |
 
 The container runs with `LLAMA_CACHE=/data/models` and `HF_HOME=/data/huggingface`, so all `-hf <repo>` downloads land on the persistent volume.
 
@@ -68,7 +69,7 @@ The container runs with `LLAMA_CACHE=/data/models` and `HF_HOME=/data/huggingfac
 | Step            | StartOS                                                                                                                               |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | Install         | Marketplace install or sideload `.s9pk`                                                                                               |
-| First-run tasks | Two `critical` tasks are auto-created: **Get API Credentials** (retrieve auto-generated key) and **Set Model** (choose what to serve) |
+| First-run tasks | A `critical` **Set Model** task is created whenever no model is selected (on install, or if the selection is later cleared). The API key is generated automatically — retrieve it any time via **Get API Credentials**. |
 | Start service   | After **Set Model** has been run; until then the daemon idles                                                                         |
 | Pull the model  | Automatic on first start (cached on the `main` volume)                                                                                |
 
@@ -78,11 +79,10 @@ Until **Set Model** has been run, the daemon stays in an idle (`sleep infinity`)
 
 ## Configuration Management
 
-Configuration is stored at `/data/store.json` and managed via the **Set Model** action:
+Serve configuration is stored at `/data/store.json` and managed via the **Set Model** action:
 
 ```json
 {
-  "apiKey": "<32-char auto-generated key>",
   "serveArgs": [
     "-hf",
     "unsloth/Qwen2.5-7B-Instruct-GGUF:Q4_K_M",
@@ -94,7 +94,9 @@ Configuration is stored at `/data/store.json` and managed via the **Set Model** 
 }
 ```
 
-`serveArgs` is the exact list of arguments appended after `/app/llama-server`. The daemon adds `--host 0.0.0.0`, `--port 8080`, and `--api-key <apiKey>` at runtime.
+`serveArgs` is the exact list of arguments appended after `/app/llama-server`. The daemon adds `--host 0.0.0.0`, `--port 8080`, and `--api-key <key>` at runtime.
+
+The auto-generated API key lives separately in `credentials.json` on the `public` volume — not in `store.json`. Publishing it there lets other StartOS services that depend on llama.cpp (for example Open WebUI) read it and connect automatically, instead of the user copying it by hand. Retrieve it any time via the **Get API Credentials** action. It is (re)generated automatically whenever it is absent — clearing `credentials.json` and restarting rotates the key.
 
 **Curated presets:** the Set Model action surfaces a hardware-tier-aware list of GGUF presets and disables ones too large for the detected memory:
 
@@ -141,7 +143,7 @@ The full surface area is documented in upstream `tools/server/README.md`.
 | Action                  | Purpose                                                                                                                                                   |
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Set Model**           | Choose a curated preset (with hardware-tier-aware availability) or a custom HuggingFace GGUF. Writes `serveArgs` to `store.json` and restarts the daemon. |
-| **Get API Credentials** | Return the auto-generated API key. Surfaced once on install via a `critical` task.                                                                        |
+| **Get API Credentials** | Return the auto-generated API key. Available any time — it is not a setup task.                                                                        |
 | **Delete Model Cache**  | Remove a specific filename from `/data/models` to reclaim disk space.                                                                                     |
 
 ---
@@ -157,6 +159,7 @@ None.
 **Included in backup:**
 
 - `main` volume — `store.json` _and_ all cached GGUF weights under `models/`.
+- `public` volume — `credentials.json` (the API key).
 
 **Restore behavior:**
 
@@ -226,6 +229,7 @@ variants: # all publish under one version; StartOS matches by detected GPU drive
     gpu_driver: i915 # Intel GPUs only
 volumes:
   main: /data
+  public: credentials.json (API key, readable by dependents)
 ports:
   api_and_ui: 8080
 env:

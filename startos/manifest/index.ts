@@ -46,7 +46,7 @@ export const manifest = setupManifest({
     'https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md',
   ],
   description: { short, long },
-  volumes: ['main'],
+  volumes: ['main', 'public'],
   images: {
     'llama-cpp': mutable(
       imageConfigs[variant as keyof typeof imageConfigs] ??
