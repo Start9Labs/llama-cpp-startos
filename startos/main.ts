@@ -1,14 +1,12 @@
 import { i18n } from './i18n'
 import { sdk } from './sdk'
 import { storeJson } from './fileModels/store.json'
-import { credentialsJson } from './fileModels/credentials.json'
 import { apiPort } from './utils'
 
 export const main = sdk.setupMain(async ({ effects }) => {
   console.info(i18n('Starting llama.cpp!'))
 
   const serveArgs = await storeJson.read((s) => s?.serveArgs).const(effects)
-  const apiKey = await credentialsJson.read((c) => c?.apiKey).const(effects)
 
   const subcontainer = await sdk.SubContainer.of(
     effects,
@@ -48,8 +46,6 @@ export const main = sdk.setupMain(async ({ effects }) => {
     '--port',
     String(apiPort),
   ]
-
-  if (apiKey) command.push('--api-key', apiKey)
 
   return sdk.Daemons.of(effects).addDaemon('primary', {
     subcontainer,

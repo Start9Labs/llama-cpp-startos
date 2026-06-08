@@ -1,12 +1,12 @@
 import { setupManifest } from '@start9labs/start-sdk'
-import { alertInstall, long, short } from './i18n'
+import { long, short } from './i18n'
 
 const variant = process.env.VARIANT || 'generic'
 
 type Mutable<T> = { -readonly [K in keyof T]: Mutable<T[K]> }
 const mutable = <T>(value: T): Mutable<T> => value as Mutable<T>
 
-const upstreamBuild = 'b9468'
+const upstreamBuild = 'b9544'
 
 const imageConfigs = {
   generic: {
@@ -46,7 +46,7 @@ export const manifest = setupManifest({
     'https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md',
   ],
   description: { short, long },
-  volumes: ['main', 'public'],
+  volumes: ['main'],
   images: {
     'llama-cpp': mutable(
       imageConfigs[variant as keyof typeof imageConfigs] ??
@@ -54,7 +54,7 @@ export const manifest = setupManifest({
     ),
   },
   alerts: {
-    install: alertInstall,
+    install: null,
     update: null,
     uninstall: null,
     restore: null,

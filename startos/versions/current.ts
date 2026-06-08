@@ -1,18 +1,43 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '1.0.9468:1',
+  version: '1.0.9544:0',
   releaseNotes: {
-    en_US:
-      'Publishes the API key on a public volume so other StartOS services (such as Open WebUI) can connect to llama.cpp automatically. Existing installs get a newly generated key — retrieve it from the Get API Credentials action and update any connected clients.',
-    es_ES:
-      'Publica la clave API en un volumen público para que otros servicios de StartOS (como Open WebUI) puedan conectarse a llama.cpp automáticamente. Las instalaciones existentes obtienen una clave recién generada: recupérala en la acción Obtener credenciales de API y actualiza los clientes conectados.',
-    de_DE:
-      'Veröffentlicht den API-Schlüssel auf einem öffentlichen Volume, damit andere StartOS-Dienste (wie Open WebUI) sich automatisch mit llama.cpp verbinden können. Bestehende Installationen erhalten einen neu generierten Schlüssel — rufe ihn über die Aktion „API-Zugangsdaten abrufen“ ab und aktualisiere verbundene Clients.',
-    pl_PL:
-      'Udostępnia klucz API na woluminie publicznym, aby inne usługi StartOS (takie jak Open WebUI) mogły automatycznie łączyć się z llama.cpp. Istniejące instalacje otrzymują nowo wygenerowany klucz — pobierz go za pomocą akcji Pobierz dane uwierzytelniające API i zaktualizuj połączone klienty.',
-    fr_FR:
-      "Publie la clé API sur un volume public afin que d'autres services StartOS (comme Open WebUI) puissent se connecter automatiquement à llama.cpp. Les installations existantes reçoivent une clé nouvellement générée — récupérez-la via l'action Obtenir les identifiants d'API et mettez à jour les clients connectés.",
+    en_US: `**Fixes**
+
+- The built-in chat UI now connects on a fresh install. The UI and API are protected by a username/password login (username \`admin\`) enforced at the StartOS reverse proxy — run the new **Set UI Password** task to generate your password. The separate API key has been removed.
+
+**Bumps**
+
+- llama.cpp → b9544.`,
+    es_ES: `**Correcciones**
+
+- La interfaz de chat integrada ahora se conecta en una instalación nueva. La interfaz y la API están protegidas por un inicio de sesión con usuario y contraseña (usuario \`admin\`) aplicado en el proxy inverso de StartOS: ejecute la nueva tarea **Establecer contraseña de la interfaz** para generar su contraseña. Se ha eliminado la clave API independiente.
+
+**Actualizaciones**
+
+- llama.cpp → b9544.`,
+    de_DE: `**Fehlerbehebungen**
+
+- Die integrierte Chat-Oberfläche verbindet sich jetzt bei einer Neuinstallation. Oberfläche und API sind durch eine Anmeldung mit Benutzername/Passwort (Benutzer \`admin\`) geschützt, die am StartOS-Reverse-Proxy erzwungen wird — führe die neue Aufgabe **UI-Passwort festlegen** aus, um dein Passwort zu generieren. Der separate API-Schlüssel wurde entfernt.
+
+**Aktualisierungen**
+
+- llama.cpp → b9544.`,
+    pl_PL: `**Poprawki**
+
+- Wbudowany interfejs czatu łączy się teraz przy nowej instalacji. Interfejs i API są chronione loginem z nazwą użytkownika i hasłem (użytkownik \`admin\`) egzekwowanym na zwrotnym proxy StartOS — uruchom nowe zadanie **Ustaw hasło interfejsu**, aby wygenerować hasło. Osobny klucz API został usunięty.
+
+**Aktualizacje**
+
+- llama.cpp → b9544.`,
+    fr_FR: `**Corrections**
+
+- L'interface de chat intégrée se connecte désormais lors d'une nouvelle installation. L'interface et l'API sont protégées par une connexion identifiant/mot de passe (utilisateur \`admin\`) appliquée au niveau du proxy inverse de StartOS — exécutez la nouvelle tâche **Définir le mot de passe de l'interface** pour générer votre mot de passe. La clé API distincte a été supprimée.
+
+**Mises à jour**
+
+- llama.cpp → b9544.`,
   },
   migrations: {
     up: async ({ effects }) => {},

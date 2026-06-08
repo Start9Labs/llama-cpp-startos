@@ -1,9 +1,9 @@
 import { sdk } from '../sdk'
-import { getApiCredentials } from './getApiCredentials'
 import { setModel } from './setModel'
+import { setUiPassword } from './setUiPassword'
 import { deleteModelCache } from './deleteModelCache'
 
 export const actions = sdk.Actions.of()
-  .addAction(getApiCredentials)
   .addAction(setModel)
+  .addAction(setUiPassword)
   .addAction(deleteModelCache)
