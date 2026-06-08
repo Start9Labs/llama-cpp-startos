@@ -1,6 +1,5 @@
-import { utils } from '@start9labs/start-sdk'
 import { setModel } from '../actions/setModel'
-import { credentialsJson } from '../fileModels/credentials.json'
+import { setUiPassword } from '../actions/setUiPassword'
 import { storeJson } from '../fileModels/store.json'
 import { i18n } from '../i18n'
 import { sdk } from '../sdk'
@@ -8,20 +7,13 @@ import { sdk } from '../sdk'
 // Runs on every init (install, update, restore, and plain restart), and
 // re-runs reactively when the watched files change.
 export const initializeService = sdk.setupOnInit(async (effects) => {
-  // Ensure an API key always exists. Generated on install, on upgrade (the
-  // key moved off the private store.json onto this public volume), and any
-  // time it has been cleared — so "delete it and restart" is all it takes to
-  // rotate. The Get API Credentials action just displays whatever is here.
-  const apiKey = await credentialsJson.read((c) => c?.apiKey).const(effects)
-  if (!apiKey) {
-    // allowWriteAfterConst: we read credentials above with .const (so this
-    // init re-runs reactively when the key is cleared); writing it back in the
-    // same run is intentional and settles after one re-run (key now present).
-    await credentialsJson.merge(
-      effects,
-      { apiKey: utils.getDefaultString({ charset: 'a-z,A-Z,0-9', len: 32 }) },
-      { allowWriteAfterConst: true },
-    )
+  // Prompt for a UI password whenever none is set — the proxy basic-auth gate
+  // stays locked (setupInterfaces uses a throwaway) until the user runs this.
+  const uiPassword = await storeJson.read((s) => s?.uiPassword).const(effects)
+  if (!uiPassword) {
+    await sdk.action.createOwnTask(effects, setUiPassword, 'critical', {
+      reason: i18n('Generate a password to log in to the llama.cpp web UI'),
+    })
   }
 
   // Prompt for a model whenever none is selected — covers first install and
