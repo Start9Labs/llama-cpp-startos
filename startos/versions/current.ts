@@ -1,43 +1,38 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '1.0.9544:0',
+  version: '1.0.9570:0',
   releaseNotes: {
-    en_US: `**Fixes**
+    en_US: `Updated llama.cpp to b9570.
 
-- The built-in chat UI now connects on a fresh install. The UI and API are protected by a username/password login (username \`admin\`) enforced at the StartOS reverse proxy — run the new **Set UI Password** task to generate your password. The separate API key has been removed.
+- Adds Gemma 4 support and video input for multimodal models.
+- Various GPU backend (CUDA, Vulkan, HIP) and model-conversion fixes.
 
-**Bumps**
+Full changelog: https://github.com/ggml-org/llama.cpp/compare/b9544...b9570`,
+    es_ES: `Se actualizó llama.cpp a b9570.
 
-- llama.cpp → b9544.`,
-    es_ES: `**Correcciones**
+- Añade compatibilidad con Gemma 4 y entrada de vídeo para modelos multimodales.
+- Varias correcciones del backend de GPU (CUDA, Vulkan, HIP) y de la conversión de modelos.
 
-- La interfaz de chat integrada ahora se conecta en una instalación nueva. La interfaz y la API están protegidas por un inicio de sesión con usuario y contraseña (usuario \`admin\`) aplicado en el proxy inverso de StartOS: ejecute la nueva tarea **Establecer contraseña de la interfaz** para generar su contraseña. Se ha eliminado la clave API independiente.
+Registro de cambios completo: https://github.com/ggml-org/llama.cpp/compare/b9544...b9570`,
+    de_DE: `llama.cpp auf b9570 aktualisiert.
 
-**Actualizaciones**
+- Fügt Gemma-4-Unterstützung und Videoeingabe für multimodale Modelle hinzu.
+- Diverse Korrekturen am GPU-Backend (CUDA, Vulkan, HIP) und an der Modellkonvertierung.
 
-- llama.cpp → b9544.`,
-    de_DE: `**Fehlerbehebungen**
+Vollständiges Änderungsprotokoll: https://github.com/ggml-org/llama.cpp/compare/b9544...b9570`,
+    pl_PL: `Zaktualizowano llama.cpp do b9570.
 
-- Die integrierte Chat-Oberfläche verbindet sich jetzt bei einer Neuinstallation. Oberfläche und API sind durch eine Anmeldung mit Benutzername/Passwort (Benutzer \`admin\`) geschützt, die am StartOS-Reverse-Proxy erzwungen wird — führe die neue Aufgabe **UI-Passwort festlegen** aus, um dein Passwort zu generieren. Der separate API-Schlüssel wurde entfernt.
+- Dodaje obsługę Gemma 4 oraz wejście wideo dla modeli multimodalnych.
+- Różne poprawki backendu GPU (CUDA, Vulkan, HIP) i konwersji modeli.
 
-**Aktualisierungen**
+Pełny dziennik zmian: https://github.com/ggml-org/llama.cpp/compare/b9544...b9570`,
+    fr_FR: `Mise à jour de llama.cpp vers b9570.
 
-- llama.cpp → b9544.`,
-    pl_PL: `**Poprawki**
+- Ajoute la prise en charge de Gemma 4 et l'entrée vidéo pour les modèles multimodaux.
+- Diverses corrections du backend GPU (CUDA, Vulkan, HIP) et de la conversion des modèles.
 
-- Wbudowany interfejs czatu łączy się teraz przy nowej instalacji. Interfejs i API są chronione loginem z nazwą użytkownika i hasłem (użytkownik \`admin\`) egzekwowanym na zwrotnym proxy StartOS — uruchom nowe zadanie **Ustaw hasło interfejsu**, aby wygenerować hasło. Osobny klucz API został usunięty.
-
-**Aktualizacje**
-
-- llama.cpp → b9544.`,
-    fr_FR: `**Corrections**
-
-- L'interface de chat intégrée se connecte désormais lors d'une nouvelle installation. L'interface et l'API sont protégées par une connexion identifiant/mot de passe (utilisateur \`admin\`) appliquée au niveau du proxy inverse de StartOS — exécutez la nouvelle tâche **Définir le mot de passe de l'interface** pour générer votre mot de passe. La clé API distincte a été supprimée.
-
-**Mises à jour**
-
-- llama.cpp → b9544.`,
+Journal des modifications complet : https://github.com/ggml-org/llama.cpp/compare/b9544...b9570`,
   },
   migrations: {
     up: async ({ effects }) => {},
