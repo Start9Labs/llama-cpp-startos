@@ -1,38 +1,43 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '1.0.9570:0',
+  version: '1.0.9603:0',
   releaseNotes: {
-    en_US: `Updated llama.cpp to b9570.
+    en_US: `Updated llama.cpp to b9603.
 
-- Adds Gemma 4 support and video input for multimodal models.
-- Various GPU backend (CUDA, Vulkan, HIP) and model-conversion fixes.
+- Web UI: pinned conversations and an opt-in, sandboxed run_javascript tool.
+- Server: keeps idle slots' KV cache warm, fixes LFM2 ignoring json_schema, and adds a --log-prompts-dir option.
+- Updates bundled LibreSSL to 4.3.2 plus assorted CUDA, Vulkan and OpenCL backend fixes.
 
-Full changelog: https://github.com/ggml-org/llama.cpp/compare/b9544...b9570`,
-    es_ES: `Se actualizó llama.cpp a b9570.
+Full changelog: https://github.com/ggml-org/llama.cpp/compare/b9570...b9603`,
+    es_ES: `Se actualizó llama.cpp a b9603.
 
-- Añade compatibilidad con Gemma 4 y entrada de vídeo para modelos multimodales.
-- Varias correcciones del backend de GPU (CUDA, Vulkan, HIP) y de la conversión de modelos.
+- Interfaz web: conversaciones fijadas y una herramienta run_javascript opcional y aislada.
+- Servidor: mantiene caliente la caché KV de los slots inactivos, corrige que LFM2 ignorara json_schema y añade la opción --log-prompts-dir.
+- Actualiza LibreSSL incluido a 4.3.2 y diversas correcciones de los backends CUDA, Vulkan y OpenCL.
 
-Registro de cambios completo: https://github.com/ggml-org/llama.cpp/compare/b9544...b9570`,
-    de_DE: `llama.cpp auf b9570 aktualisiert.
+Registro de cambios completo: https://github.com/ggml-org/llama.cpp/compare/b9570...b9603`,
+    de_DE: `llama.cpp auf b9603 aktualisiert.
 
-- Fügt Gemma-4-Unterstützung und Videoeingabe für multimodale Modelle hinzu.
-- Diverse Korrekturen am GPU-Backend (CUDA, Vulkan, HIP) und an der Modellkonvertierung.
+- Weboberfläche: angeheftete Unterhaltungen und ein optionales, isoliertes run_javascript-Werkzeug.
+- Server: hält den KV-Cache inaktiver Slots warm, behebt das Ignorieren von json_schema durch LFM2 und fügt die Option --log-prompts-dir hinzu.
+- Aktualisiert das mitgelieferte LibreSSL auf 4.3.2 sowie diverse Korrekturen an den CUDA-, Vulkan- und OpenCL-Backends.
 
-Vollständiges Änderungsprotokoll: https://github.com/ggml-org/llama.cpp/compare/b9544...b9570`,
-    pl_PL: `Zaktualizowano llama.cpp do b9570.
+Vollständiges Änderungsprotokoll: https://github.com/ggml-org/llama.cpp/compare/b9570...b9603`,
+    pl_PL: `Zaktualizowano llama.cpp do b9603.
 
-- Dodaje obsługę Gemma 4 oraz wejście wideo dla modeli multimodalnych.
-- Różne poprawki backendu GPU (CUDA, Vulkan, HIP) i konwersji modeli.
+- Interfejs WWW: przypięte rozmowy oraz opcjonalne, izolowane narzędzie run_javascript.
+- Serwer: utrzymuje ciepłą pamięć podręczną KV bezczynnych slotów, naprawia ignorowanie json_schema przez LFM2 i dodaje opcję --log-prompts-dir.
+- Aktualizuje dołączony LibreSSL do 4.3.2 oraz różne poprawki backendów CUDA, Vulkan i OpenCL.
 
-Pełny dziennik zmian: https://github.com/ggml-org/llama.cpp/compare/b9544...b9570`,
-    fr_FR: `Mise à jour de llama.cpp vers b9570.
+Pełny dziennik zmian: https://github.com/ggml-org/llama.cpp/compare/b9570...b9603`,
+    fr_FR: `Mise à jour de llama.cpp vers b9603.
 
-- Ajoute la prise en charge de Gemma 4 et l'entrée vidéo pour les modèles multimodaux.
-- Diverses corrections du backend GPU (CUDA, Vulkan, HIP) et de la conversion des modèles.
+- Interface web : conversations épinglées et un outil run_javascript optionnel et isolé.
+- Serveur : conserve le cache KV des slots inactifs au chaud, corrige LFM2 qui ignorait json_schema et ajoute une option --log-prompts-dir.
+- Met à jour LibreSSL intégré vers 4.3.2 ainsi que divers correctifs des backends CUDA, Vulkan et OpenCL.
 
-Journal des modifications complet : https://github.com/ggml-org/llama.cpp/compare/b9544...b9570`,
+Journal des modifications complet : https://github.com/ggml-org/llama.cpp/compare/b9570...b9603`,
   },
   migrations: {
     up: async ({ effects }) => {},
