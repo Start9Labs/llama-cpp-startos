@@ -1,43 +1,43 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '1.0.9603:0',
+  version: '1.0.9628:0',
   releaseNotes: {
-    en_US: `Updated llama.cpp to b9603.
+    en_US: `Updated llama.cpp to b9628.
 
-- Web UI: pinned conversations and an opt-in, sandboxed run_javascript tool.
-- Server: keeps idle slots' KV cache warm, fixes LFM2 ignoring json_schema, and adds a --log-prompts-dir option.
-- Updates bundled LibreSSL to 4.3.2 plus assorted CUDA, Vulkan and OpenCL backend fixes.
+- Adds EAGLE3 speculative decoding and support for the cohere2-MoE architecture.
+- Web UI: PWA support, build-time gzip compression, JPEG EXIF orientation handling, and preserved file names/paths for attachments.
+- Server: fixes reasoning-budget WebUI precedence over model.ini and cleans up static-asset handling.
 
-Full changelog: https://github.com/ggml-org/llama.cpp/compare/b9570...b9603`,
-    es_ES: `Se actualizó llama.cpp a b9603.
+Full changelog: https://github.com/ggml-org/llama.cpp/compare/b9603...b9628`,
+    es_ES: `Se actualizó llama.cpp a b9628.
 
-- Interfaz web: conversaciones fijadas y una herramienta run_javascript opcional y aislada.
-- Servidor: mantiene caliente la caché KV de los slots inactivos, corrige que LFM2 ignorara json_schema y añade la opción --log-prompts-dir.
-- Actualiza LibreSSL incluido a 4.3.2 y diversas correcciones de los backends CUDA, Vulkan y OpenCL.
+- Añade decodificación especulativa EAGLE3 y soporte para la arquitectura cohere2-MoE.
+- Interfaz web: soporte PWA, compresión gzip en tiempo de compilación, manejo de orientación EXIF de JPEG y conservación de nombres/rutas de archivos adjuntos.
+- Servidor: corrige la precedencia del presupuesto de razonamiento de la WebUI sobre model.ini y depura el manejo de recursos estáticos.
 
-Registro de cambios completo: https://github.com/ggml-org/llama.cpp/compare/b9570...b9603`,
-    de_DE: `llama.cpp auf b9603 aktualisiert.
+Registro de cambios completo: https://github.com/ggml-org/llama.cpp/compare/b9603...b9628`,
+    de_DE: `llama.cpp auf b9628 aktualisiert.
 
-- Weboberfläche: angeheftete Unterhaltungen und ein optionales, isoliertes run_javascript-Werkzeug.
-- Server: hält den KV-Cache inaktiver Slots warm, behebt das Ignorieren von json_schema durch LFM2 und fügt die Option --log-prompts-dir hinzu.
-- Aktualisiert das mitgelieferte LibreSSL auf 4.3.2 sowie diverse Korrekturen an den CUDA-, Vulkan- und OpenCL-Backends.
+- Fügt spekulative EAGLE3-Dekodierung und Unterstützung für die cohere2-MoE-Architektur hinzu.
+- Weboberfläche: PWA-Unterstützung, gzip-Komprimierung zur Build-Zeit, Behandlung der JPEG-EXIF-Ausrichtung und Beibehaltung von Dateinamen/-pfaden bei Anhängen.
+- Server: behebt den Vorrang des WebUI-Reasoning-Budgets gegenüber model.ini und bereinigt die Behandlung statischer Assets.
 
-Vollständiges Änderungsprotokoll: https://github.com/ggml-org/llama.cpp/compare/b9570...b9603`,
-    pl_PL: `Zaktualizowano llama.cpp do b9603.
+Vollständiges Änderungsprotokoll: https://github.com/ggml-org/llama.cpp/compare/b9603...b9628`,
+    pl_PL: `Zaktualizowano llama.cpp do b9628.
 
-- Interfejs WWW: przypięte rozmowy oraz opcjonalne, izolowane narzędzie run_javascript.
-- Serwer: utrzymuje ciepłą pamięć podręczną KV bezczynnych slotów, naprawia ignorowanie json_schema przez LFM2 i dodaje opcję --log-prompts-dir.
-- Aktualizuje dołączony LibreSSL do 4.3.2 oraz różne poprawki backendów CUDA, Vulkan i OpenCL.
+- Dodaje spekulatywne dekodowanie EAGLE3 oraz obsługę architektury cohere2-MoE.
+- Interfejs WWW: obsługa PWA, kompresja gzip na etapie budowania, obsługa orientacji EXIF w JPEG oraz zachowanie nazw/ścieżek załączników.
+- Serwer: naprawia pierwszeństwo budżetu rozumowania WebUI nad model.ini i porządkuje obsługę zasobów statycznych.
 
-Pełny dziennik zmian: https://github.com/ggml-org/llama.cpp/compare/b9570...b9603`,
-    fr_FR: `Mise à jour de llama.cpp vers b9603.
+Pełny dziennik zmian: https://github.com/ggml-org/llama.cpp/compare/b9603...b9628`,
+    fr_FR: `Mise à jour de llama.cpp vers b9628.
 
-- Interface web : conversations épinglées et un outil run_javascript optionnel et isolé.
-- Serveur : conserve le cache KV des slots inactifs au chaud, corrige LFM2 qui ignorait json_schema et ajoute une option --log-prompts-dir.
-- Met à jour LibreSSL intégré vers 4.3.2 ainsi que divers correctifs des backends CUDA, Vulkan et OpenCL.
+- Ajoute le décodage spéculatif EAGLE3 et la prise en charge de l'architecture cohere2-MoE.
+- Interface web : prise en charge PWA, compression gzip à la compilation, gestion de l'orientation EXIF des JPEG et conservation des noms/chemins de fichiers joints.
+- Serveur : corrige la priorité du budget de raisonnement de la WebUI sur model.ini et nettoie la gestion des ressources statiques.
 
-Journal des modifications complet : https://github.com/ggml-org/llama.cpp/compare/b9570...b9603`,
+Journal des modifications complet : https://github.com/ggml-org/llama.cpp/compare/b9603...b9628`,
   },
   migrations: {
     up: async ({ effects }) => {},
