@@ -1,43 +1,43 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '1.0.9628:0',
+  version: '1.0.9641:0',
   releaseNotes: {
-    en_US: `Updated llama.cpp to b9628.
+    en_US: `Updated llama.cpp to b9641.
 
-- Adds EAGLE3 speculative decoding and support for the cohere2-MoE architecture.
-- Web UI: PWA support, build-time gzip compression, JPEG EXIF orientation handling, and preserved file names/paths for attachments.
-- Server: fixes reasoning-budget WebUI precedence over model.ini and cleans up static-asset handling.
+- Adds the Cohere2MoE (North Code) architecture with a dedicated chat parser.
+- Web UI: HEIC/HEIF image support, thinking/reasoning blocks rendered as markdown, and mobile keyboard, PWA-popup, and clipping fixes.
+- WebGPU: faster i-quants mul_mat and quicker prefill.
 
-Full changelog: https://github.com/ggml-org/llama.cpp/compare/b9603...b9628`,
-    es_ES: `Se actualizó llama.cpp a b9628.
+Full changelog: https://github.com/ggml-org/llama.cpp/compare/b9628...b9641`,
+    es_ES: `Se actualizó llama.cpp a b9641.
 
-- Añade decodificación especulativa EAGLE3 y soporte para la arquitectura cohere2-MoE.
-- Interfaz web: soporte PWA, compresión gzip en tiempo de compilación, manejo de orientación EXIF de JPEG y conservación de nombres/rutas de archivos adjuntos.
-- Servidor: corrige la precedencia del presupuesto de razonamiento de la WebUI sobre model.ini y depura el manejo de recursos estáticos.
+- Añade la arquitectura Cohere2MoE (North Code) con un analizador de chat dedicado.
+- Interfaz web: soporte de imágenes HEIC/HEIF, bloques de razonamiento renderizados como markdown y correcciones del teclado móvil, del aviso PWA y de recortes de la interfaz.
+- WebGPU: mul_mat de i-quants más rápido y prellenado más ágil.
 
-Registro de cambios completo: https://github.com/ggml-org/llama.cpp/compare/b9603...b9628`,
-    de_DE: `llama.cpp auf b9628 aktualisiert.
+Registro de cambios completo: https://github.com/ggml-org/llama.cpp/compare/b9628...b9641`,
+    de_DE: `llama.cpp auf b9641 aktualisiert.
 
-- Fügt spekulative EAGLE3-Dekodierung und Unterstützung für die cohere2-MoE-Architektur hinzu.
-- Weboberfläche: PWA-Unterstützung, gzip-Komprimierung zur Build-Zeit, Behandlung der JPEG-EXIF-Ausrichtung und Beibehaltung von Dateinamen/-pfaden bei Anhängen.
-- Server: behebt den Vorrang des WebUI-Reasoning-Budgets gegenüber model.ini und bereinigt die Behandlung statischer Assets.
+- Fügt die Cohere2MoE-Architektur (North Code) mit einem dedizierten Chat-Parser hinzu.
+- Weboberfläche: Unterstützung für HEIC/HEIF-Bilder, als Markdown gerenderte Reasoning-Blöcke sowie Korrekturen für mobile Tastatur, PWA-Popup und Clipping.
+- WebGPU: schnelleres i-quants mul_mat und zügigeres Prefill.
 
-Vollständiges Änderungsprotokoll: https://github.com/ggml-org/llama.cpp/compare/b9603...b9628`,
-    pl_PL: `Zaktualizowano llama.cpp do b9628.
+Vollständiges Änderungsprotokoll: https://github.com/ggml-org/llama.cpp/compare/b9628...b9641`,
+    pl_PL: `Zaktualizowano llama.cpp do b9641.
 
-- Dodaje spekulatywne dekodowanie EAGLE3 oraz obsługę architektury cohere2-MoE.
-- Interfejs WWW: obsługa PWA, kompresja gzip na etapie budowania, obsługa orientacji EXIF w JPEG oraz zachowanie nazw/ścieżek załączników.
-- Serwer: naprawia pierwszeństwo budżetu rozumowania WebUI nad model.ini i porządkuje obsługę zasobów statycznych.
+- Dodaje architekturę Cohere2MoE (North Code) z dedykowanym parserem czatu.
+- Interfejs WWW: obsługa obrazów HEIC/HEIF, bloki rozumowania renderowane jako markdown oraz poprawki klawiatury mobilnej, wyskakującego okna PWA i przycinania.
+- WebGPU: szybsze mul_mat dla i-quants i sprawniejsze prefill.
 
-Pełny dziennik zmian: https://github.com/ggml-org/llama.cpp/compare/b9603...b9628`,
-    fr_FR: `Mise à jour de llama.cpp vers b9628.
+Pełny dziennik zmian: https://github.com/ggml-org/llama.cpp/compare/b9628...b9641`,
+    fr_FR: `Mise à jour de llama.cpp vers b9641.
 
-- Ajoute le décodage spéculatif EAGLE3 et la prise en charge de l'architecture cohere2-MoE.
-- Interface web : prise en charge PWA, compression gzip à la compilation, gestion de l'orientation EXIF des JPEG et conservation des noms/chemins de fichiers joints.
-- Serveur : corrige la priorité du budget de raisonnement de la WebUI sur model.ini et nettoie la gestion des ressources statiques.
+- Ajoute l'architecture Cohere2MoE (North Code) avec un analyseur de chat dédié.
+- Interface web : prise en charge des images HEIC/HEIF, blocs de raisonnement rendus en markdown et corrections du clavier mobile, de la popup PWA et du rognage.
+- WebGPU : mul_mat des i-quants plus rapide et préremplissage accéléré.
 
-Journal des modifications complet : https://github.com/ggml-org/llama.cpp/compare/b9603...b9628`,
+Journal des modifications complet : https://github.com/ggml-org/llama.cpp/compare/b9628...b9641`,
   },
   migrations: {
     up: async ({ effects }) => {},
