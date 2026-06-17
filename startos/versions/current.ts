@@ -1,43 +1,43 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '1.0.9544:0',
+  version: '1.0.9680:0',
   releaseNotes: {
-    en_US: `**Fixes**
+    en_US: `Updated llama.cpp to b9680. A maintenance release of web UI, backend, and security improvements.
 
-- The built-in chat UI now connects on a fresh install. The UI and API are protected by a username/password login (username \`admin\`) enforced at the StartOS reverse proxy — run the new **Set UI Password** task to generate your password. The separate API key has been removed.
+- Web UI: source toggle for rendered mermaid and SVG blocks; SSE transport detection fixed when routed through the CORS proxy.
+- Backends: Vulkan host-visible memory on UMA devices, SYCL USM allocations and a use-after-free fix, OpenVINO 2026.2 support, and assorted OpenCL/CUDA fixes.
+- Security: vendored BoringSSL updated.
 
-**Bumps**
+Full changelog: https://github.com/ggml-org/llama.cpp/compare/b9664...b9680`,
+    es_ES: `Se actualizó llama.cpp a b9680. Versión de mantenimiento con mejoras de la interfaz web, del backend y de seguridad.
 
-- llama.cpp → b9544.`,
-    es_ES: `**Correcciones**
+- Interfaz web: alternancia de código fuente para los bloques mermaid y SVG renderizados; corregida la detección del transporte SSE al enrutarse a través del proxy CORS.
+- Backends: memoria visible para el host en dispositivos UMA de Vulkan, asignaciones USM de SYCL y corrección de un uso después de liberar, compatibilidad con OpenVINO 2026.2 y varias correcciones de OpenCL/CUDA.
+- Seguridad: actualizado BoringSSL incluido.
 
-- La interfaz de chat integrada ahora se conecta en una instalación nueva. La interfaz y la API están protegidas por un inicio de sesión con usuario y contraseña (usuario \`admin\`) aplicado en el proxy inverso de StartOS: ejecute la nueva tarea **Establecer contraseña de la interfaz** para generar su contraseña. Se ha eliminado la clave API independiente.
+Registro de cambios completo: https://github.com/ggml-org/llama.cpp/compare/b9664...b9680`,
+    de_DE: `llama.cpp auf b9680 aktualisiert. Ein Wartungs-Release mit Verbesserungen der Weboberfläche, des Backends und der Sicherheit.
 
-**Actualizaciones**
+- Weboberfläche: Quelltext-Umschalter für gerenderte Mermaid- und SVG-Blöcke; SSE-Transporterkennung beim Routing über den CORS-Proxy behoben.
+- Backends: Host-sichtbarer Speicher auf UMA-Geräten in Vulkan, SYCL-USM-Zuweisungen und Behebung eines Use-after-free, OpenVINO-2026.2-Unterstützung sowie diverse OpenCL-/CUDA-Korrekturen.
+- Sicherheit: mitgeliefertes BoringSSL aktualisiert.
 
-- llama.cpp → b9544.`,
-    de_DE: `**Fehlerbehebungen**
+Vollständiges Änderungsprotokoll: https://github.com/ggml-org/llama.cpp/compare/b9664...b9680`,
+    pl_PL: `Zaktualizowano llama.cpp do b9680. Wydanie konserwacyjne z ulepszeniami interfejsu WWW, backendu i bezpieczeństwa.
 
-- Die integrierte Chat-Oberfläche verbindet sich jetzt bei einer Neuinstallation. Oberfläche und API sind durch eine Anmeldung mit Benutzername/Passwort (Benutzer \`admin\`) geschützt, die am StartOS-Reverse-Proxy erzwungen wird — führe die neue Aufgabe **UI-Passwort festlegen** aus, um dein Passwort zu generieren. Der separate API-Schlüssel wurde entfernt.
+- Interfejs WWW: przełącznik kodu źródłowego dla renderowanych bloków mermaid i SVG; naprawiono wykrywanie transportu SSE przy trasowaniu przez proxy CORS.
+- Backendy: pamięć widoczna dla hosta na urządzeniach UMA w Vulkan, alokacje USM w SYCL i poprawka use-after-free, obsługa OpenVINO 2026.2 oraz różne poprawki OpenCL/CUDA.
+- Bezpieczeństwo: zaktualizowano dołączony BoringSSL.
 
-**Aktualisierungen**
+Pełny dziennik zmian: https://github.com/ggml-org/llama.cpp/compare/b9664...b9680`,
+    fr_FR: `Mise à jour de llama.cpp vers b9680. Une version de maintenance apportant des améliorations de l'interface web, du backend et de la sécurité.
 
-- llama.cpp → b9544.`,
-    pl_PL: `**Poprawki**
+- Interface web : bascule du code source pour les blocs mermaid et SVG rendus ; détection du transport SSE corrigée lors du routage via le proxy CORS.
+- Backends : mémoire visible par l'hôte sur les appareils UMA de Vulkan, allocations USM de SYCL et correction d'un use-after-free, prise en charge d'OpenVINO 2026.2 et diverses corrections OpenCL/CUDA.
+- Sécurité : BoringSSL fourni mis à jour.
 
-- Wbudowany interfejs czatu łączy się teraz przy nowej instalacji. Interfejs i API są chronione loginem z nazwą użytkownika i hasłem (użytkownik \`admin\`) egzekwowanym na zwrotnym proxy StartOS — uruchom nowe zadanie **Ustaw hasło interfejsu**, aby wygenerować hasło. Osobny klucz API został usunięty.
-
-**Aktualizacje**
-
-- llama.cpp → b9544.`,
-    fr_FR: `**Corrections**
-
-- L'interface de chat intégrée se connecte désormais lors d'une nouvelle installation. L'interface et l'API sont protégées par une connexion identifiant/mot de passe (utilisateur \`admin\`) appliquée au niveau du proxy inverse de StartOS — exécutez la nouvelle tâche **Définir le mot de passe de l'interface** pour générer votre mot de passe. La clé API distincte a été supprimée.
-
-**Mises à jour**
-
-- llama.cpp → b9544.`,
+Journal des modifications complet : https://github.com/ggml-org/llama.cpp/compare/b9664...b9680`,
   },
   migrations: {
     up: async ({ effects }) => {},
