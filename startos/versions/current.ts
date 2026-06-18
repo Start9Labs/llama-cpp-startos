@@ -1,43 +1,43 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '1.0.9680:0',
+  version: '1.0.9692:0',
   releaseNotes: {
-    en_US: `Updated llama.cpp to b9680. A maintenance release of web UI, backend, and security improvements.
+    en_US: `Updated llama.cpp to b9692. A maintenance release with new web UI and server features plus backend fixes.
 
-- Web UI: source toggle for rendered mermaid and SVG blocks; SSE transport detection fixed when routed through the CORS proxy.
-- Backends: Vulkan host-visible memory on UMA devices, SYCL USM allocations and a use-after-free fix, OpenVINO 2026.2 support, and assorted OpenCL/CUDA fixes.
-- Security: vendored BoringSSL updated.
+- Web UI: export and import conversations as JSONL (and zip bundles), keeping legacy JSON import.
+- Server: new model management API for the router (list, download, and delete models).
+- Backends: Vulkan memory-property fixes, SYCL device-to-device memcpy and p2p detection, a CUDA context revert, and an eagle3 long-prompt segfault fix.
 
-Full changelog: https://github.com/ggml-org/llama.cpp/compare/b9664...b9680`,
-    es_ES: `Se actualizó llama.cpp a b9680. Versión de mantenimiento con mejoras de la interfaz web, del backend y de seguridad.
+Full changelog: https://github.com/ggml-org/llama.cpp/compare/b9680...b9692`,
+    es_ES: `Se actualizó llama.cpp a b9692. Versión de mantenimiento con nuevas funciones de la interfaz web y del servidor, además de correcciones del backend.
 
-- Interfaz web: alternancia de código fuente para los bloques mermaid y SVG renderizados; corregida la detección del transporte SSE al enrutarse a través del proxy CORS.
-- Backends: memoria visible para el host en dispositivos UMA de Vulkan, asignaciones USM de SYCL y corrección de un uso después de liberar, compatibilidad con OpenVINO 2026.2 y varias correcciones de OpenCL/CUDA.
-- Seguridad: actualizado BoringSSL incluido.
+- Interfaz web: exportación e importación de conversaciones en formato JSONL (y paquetes zip), manteniendo la importación del formato JSON heredado.
+- Servidor: nueva API de gestión de modelos para el enrutador (listar, descargar y eliminar modelos).
+- Backends: correcciones de propiedades de memoria en Vulkan, memcpy de dispositivo a dispositivo y detección p2p en SYCL, reversión de un contexto CUDA y corrección de un segfault con prompts largos en eagle3.
 
-Registro de cambios completo: https://github.com/ggml-org/llama.cpp/compare/b9664...b9680`,
-    de_DE: `llama.cpp auf b9680 aktualisiert. Ein Wartungs-Release mit Verbesserungen der Weboberfläche, des Backends und der Sicherheit.
+Registro de cambios completo: https://github.com/ggml-org/llama.cpp/compare/b9680...b9692`,
+    de_DE: `llama.cpp auf b9692 aktualisiert. Ein Wartungs-Release mit neuen Funktionen für Weboberfläche und Server sowie Backend-Korrekturen.
 
-- Weboberfläche: Quelltext-Umschalter für gerenderte Mermaid- und SVG-Blöcke; SSE-Transporterkennung beim Routing über den CORS-Proxy behoben.
-- Backends: Host-sichtbarer Speicher auf UMA-Geräten in Vulkan, SYCL-USM-Zuweisungen und Behebung eines Use-after-free, OpenVINO-2026.2-Unterstützung sowie diverse OpenCL-/CUDA-Korrekturen.
-- Sicherheit: mitgeliefertes BoringSSL aktualisiert.
+- Weboberfläche: Export und Import von Unterhaltungen als JSONL (und ZIP-Bündel), der Import des bisherigen JSON-Formats bleibt erhalten.
+- Server: neue Modellverwaltungs-API für den Router (Modelle auflisten, herunterladen und löschen).
+- Backends: Korrekturen der Speichereigenschaften in Vulkan, Gerät-zu-Gerät-memcpy und p2p-Erkennung in SYCL, Rücknahme einer CUDA-Kontextänderung sowie Behebung eines Segfaults bei langen Prompts in eagle3.
 
-Vollständiges Änderungsprotokoll: https://github.com/ggml-org/llama.cpp/compare/b9664...b9680`,
-    pl_PL: `Zaktualizowano llama.cpp do b9680. Wydanie konserwacyjne z ulepszeniami interfejsu WWW, backendu i bezpieczeństwa.
+Vollständiges Änderungsprotokoll: https://github.com/ggml-org/llama.cpp/compare/b9680...b9692`,
+    pl_PL: `Zaktualizowano llama.cpp do b9692. Wydanie konserwacyjne z nowymi funkcjami interfejsu WWW i serwera oraz poprawkami backendu.
 
-- Interfejs WWW: przełącznik kodu źródłowego dla renderowanych bloków mermaid i SVG; naprawiono wykrywanie transportu SSE przy trasowaniu przez proxy CORS.
-- Backendy: pamięć widoczna dla hosta na urządzeniach UMA w Vulkan, alokacje USM w SYCL i poprawka use-after-free, obsługa OpenVINO 2026.2 oraz różne poprawki OpenCL/CUDA.
-- Bezpieczeństwo: zaktualizowano dołączony BoringSSL.
+- Interfejs WWW: eksport i import konwersacji w formacie JSONL (oraz pakietów zip), z zachowaniem importu starszego formatu JSON.
+- Serwer: nowe API zarządzania modelami dla routera (lista, pobieranie i usuwanie modeli).
+- Backendy: poprawki właściwości pamięci w Vulkan, memcpy między urządzeniami i wykrywanie p2p w SYCL, wycofanie zmiany kontekstu CUDA oraz poprawka segfaultu przy długich promptach w eagle3.
 
-Pełny dziennik zmian: https://github.com/ggml-org/llama.cpp/compare/b9664...b9680`,
-    fr_FR: `Mise à jour de llama.cpp vers b9680. Une version de maintenance apportant des améliorations de l'interface web, du backend et de la sécurité.
+Pełny dziennik zmian: https://github.com/ggml-org/llama.cpp/compare/b9680...b9692`,
+    fr_FR: `Mise à jour de llama.cpp vers b9692. Une version de maintenance apportant de nouvelles fonctionnalités d'interface web et de serveur ainsi que des corrections de backend.
 
-- Interface web : bascule du code source pour les blocs mermaid et SVG rendus ; détection du transport SSE corrigée lors du routage via le proxy CORS.
-- Backends : mémoire visible par l'hôte sur les appareils UMA de Vulkan, allocations USM de SYCL et correction d'un use-after-free, prise en charge d'OpenVINO 2026.2 et diverses corrections OpenCL/CUDA.
-- Sécurité : BoringSSL fourni mis à jour.
+- Interface web : exportation et importation des conversations au format JSONL (et archives zip), tout en conservant l'importation de l'ancien format JSON.
+- Serveur : nouvelle API de gestion des modèles pour le routeur (lister, télécharger et supprimer des modèles).
+- Backends : corrections des propriétés mémoire de Vulkan, memcpy d'appareil à appareil et détection p2p en SYCL, annulation d'un contexte CUDA et correction d'un segfault sur les prompts longs avec eagle3.
 
-Journal des modifications complet : https://github.com/ggml-org/llama.cpp/compare/b9664...b9680`,
+Journal des modifications complet : https://github.com/ggml-org/llama.cpp/compare/b9680...b9692`,
   },
   migrations: {
     up: async ({ effects }) => {},
