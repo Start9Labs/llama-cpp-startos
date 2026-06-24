@@ -1,48 +1,43 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '1.0.9737:0',
+  version: '1.0.9776:0',
   releaseNotes: {
-    en_US: `Updated llama.cpp to b9737. A maintenance release with server fixes, a new \`--agent\` option, and multimodal and backend improvements.
+    en_US: `Updated llama.cpp to b9776. A maintenance release with a server security fix, real-time model load progress, and backend improvements.
 
-- Server: fixed an out-of-bounds \`n_discard\` value during context shifting, consolidated slot selection, optimized token-probability handling, and refactored router/child communication.
-- Added a \`--agent\` server argument; \`--api-key-file\` now supports comment lines.
-- Multimodal (mtmd): several bug fixes, including UTF-8 handling on Windows.
-- Backends: AMX optimizations and WebGPU F16 adapter toggles for Vulkan/NVIDIA.
+- Server: no longer forwards auth headers through the CORS proxy; added real-time model load progress via \`/models/sse\`, tool-call response IDs, and per-user-message checkpoints.
+- Multimodal (mtmd): added a model load progress callback.
+- Backends: Vulkan and WebGPU improvements (CONV_3D support, FA bias-before-softmax overflow fix) plus OpenCL precision gains.
 
-Full changelog: https://github.com/ggml-org/llama.cpp/compare/b9717...b9737`,
-    es_ES: `Se actualizó llama.cpp a b9737. Versión de mantenimiento con correcciones del servidor, una nueva opción \`--agent\` y mejoras multimodales y de backend.
+Full changelog: https://github.com/ggml-org/llama.cpp/compare/b9737...b9776`,
+    es_ES: `Se actualizó llama.cpp a b9776. Versión de mantenimiento con una corrección de seguridad del servidor, progreso de carga de modelos en tiempo real y mejoras de backend.
 
-- Servidor: se corrigió un valor \`n_discard\` fuera de rango durante el desplazamiento de contexto, se consolidó la selección de ranuras, se optimizó el manejo de la probabilidad de tokens y se rediseñó la comunicación enrutador/hijo.
-- Se añadió un argumento de servidor \`--agent\`; \`--api-key-file\` ahora admite líneas de comentario.
-- Multimodal (mtmd): varias correcciones de errores, incluido el manejo de UTF-8 en Windows.
-- Backends: optimizaciones AMX y conmutadores de adaptador WebGPU F16 para Vulkan/NVIDIA.
+- Servidor: ya no reenvía cabeceras de autenticación a través del proxy CORS; se añadió progreso de carga de modelos en tiempo real mediante \`/models/sse\`, IDs en respuestas de llamadas a herramientas y puntos de control por mensaje de usuario.
+- Multimodal (mtmd): se añadió una devolución de llamada de progreso de carga del modelo.
+- Backends: mejoras en Vulkan y WebGPU (soporte de CONV_3D, corrección de desbordamiento de FA con sesgo antes de softmax) y mayor precisión en OpenCL.
 
-Registro de cambios completo: https://github.com/ggml-org/llama.cpp/compare/b9717...b9737`,
-    de_DE: `llama.cpp auf b9737 aktualisiert. Ein Wartungs-Release mit Server-Korrekturen, einer neuen \`--agent\`-Option sowie Multimodal- und Backend-Verbesserungen.
+Registro de cambios completo: https://github.com/ggml-org/llama.cpp/compare/b9737...b9776`,
+    de_DE: `llama.cpp auf b9776 aktualisiert. Ein Wartungs-Release mit einer Server-Sicherheitskorrektur, Echtzeit-Modellladefortschritt und Backend-Verbesserungen.
 
-- Server: Ein außerhalb des gültigen Bereichs liegender \`n_discard\`-Wert beim Kontextverschieben wurde behoben, die Slot-Auswahl konsolidiert, die Token-Wahrscheinlichkeitsverarbeitung optimiert und die Router/Kind-Kommunikation überarbeitet.
-- Ein \`--agent\`-Serverargument wurde hinzugefügt; \`--api-key-file\` unterstützt jetzt Kommentarzeilen.
-- Multimodal (mtmd): mehrere Fehlerbehebungen, einschließlich UTF-8-Behandlung unter Windows.
-- Backends: AMX-Optimierungen und WebGPU-F16-Adapterschalter für Vulkan/NVIDIA.
+- Server: Auth-Header werden nicht mehr über den CORS-Proxy weitergeleitet; Echtzeit-Modellladefortschritt über \`/models/sse\`, IDs in Tool-Call-Antworten und Prüfpunkte pro Benutzernachricht hinzugefügt.
+- Multimodal (mtmd): Ein Rückruf für den Modellladefortschritt wurde hinzugefügt.
+- Backends: Vulkan- und WebGPU-Verbesserungen (CONV_3D-Unterstützung, FA-Bias-vor-Softmax-Überlaufkorrektur) sowie Präzisionsgewinne bei OpenCL.
 
-Vollständiges Änderungsprotokoll: https://github.com/ggml-org/llama.cpp/compare/b9717...b9737`,
-    pl_PL: `Zaktualizowano llama.cpp do b9737. Wydanie konserwacyjne z poprawkami serwera, nową opcją \`--agent\` oraz usprawnieniami multimodalnymi i backendu.
+Vollständiges Änderungsprotokoll: https://github.com/ggml-org/llama.cpp/compare/b9737...b9776`,
+    pl_PL: `Zaktualizowano llama.cpp do b9776. Wydanie konserwacyjne z poprawką bezpieczeństwa serwera, postępem ładowania modeli w czasie rzeczywistym i usprawnieniami backendu.
 
-- Serwer: naprawiono wartość \`n_discard\` poza zakresem podczas przesuwania kontekstu, skonsolidowano wybór slotów, zoptymalizowano obsługę prawdopodobieństwa tokenów i przebudowano komunikację router/dziecko.
-- Dodano argument serwera \`--agent\`; \`--api-key-file\` obsługuje teraz wiersze komentarzy.
-- Multimodalność (mtmd): kilka poprawek błędów, w tym obsługa UTF-8 w systemie Windows.
-- Backendy: optymalizacje AMX i przełączniki adaptera WebGPU F16 dla Vulkan/NVIDIA.
+- Serwer: nie przekazuje już nagłówków uwierzytelniania przez proxy CORS; dodano postęp ładowania modeli w czasie rzeczywistym przez \`/models/sse\`, identyfikatory w odpowiedziach wywołań narzędzi oraz punkty kontrolne dla każdej wiadomości użytkownika.
+- Multimodalność (mtmd): dodano wywołanie zwrotne postępu ładowania modelu.
+- Backendy: usprawnienia Vulkan i WebGPU (obsługa CONV_3D, poprawka przepełnienia FA bias-przed-softmax) oraz wzrost precyzji w OpenCL.
 
-Pełny dziennik zmian: https://github.com/ggml-org/llama.cpp/compare/b9717...b9737`,
-    fr_FR: `Mise à jour de llama.cpp vers b9737. Une version de maintenance apportant des corrections du serveur, une nouvelle option \`--agent\` et des améliorations multimodales et de backend.
+Pełny dziennik zmian: https://github.com/ggml-org/llama.cpp/compare/b9737...b9776`,
+    fr_FR: `Mise à jour de llama.cpp vers b9776. Une version de maintenance apportant un correctif de sécurité du serveur, un suivi en temps réel du chargement des modèles et des améliorations de backend.
 
-- Serveur : correction d'une valeur \`n_discard\` hors limites lors du décalage de contexte, consolidation de la sélection des emplacements, optimisation de la gestion des probabilités de jetons et refonte de la communication routeur/enfant.
-- Ajout d'un argument de serveur \`--agent\` ; \`--api-key-file\` prend désormais en charge les lignes de commentaire.
-- Multimodal (mtmd) : plusieurs corrections de bogues, dont la gestion de l'UTF-8 sous Windows.
-- Backends : optimisations AMX et bascules d'adaptateur WebGPU F16 pour Vulkan/NVIDIA.
+- Serveur : ne transmet plus les en-têtes d'authentification via le proxy CORS ; ajout du suivi en temps réel du chargement des modèles via \`/models/sse\`, d'identifiants dans les réponses d'appels d'outils et de points de contrôle par message utilisateur.
+- Multimodal (mtmd) : ajout d'un rappel de progression du chargement du modèle.
+- Backends : améliorations Vulkan et WebGPU (prise en charge de CONV_3D, correction du dépassement FA biais-avant-softmax) ainsi que des gains de précision sur OpenCL.
 
-Journal des modifications complet : https://github.com/ggml-org/llama.cpp/compare/b9717...b9737`,
+Journal des modifications complet : https://github.com/ggml-org/llama.cpp/compare/b9737...b9776`,
   },
   migrations: {
     up: async ({ effects }) => {},
