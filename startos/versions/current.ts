@@ -1,43 +1,43 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '1.0.9787:0',
+  version: '1.0.9828:0',
   releaseNotes: {
-    en_US: `Updated llama.cpp to b9787. A maintenance release focused on the web UI and new model/backend support.
+    en_US: `Updated llama.cpp to b9828. A maintenance release with streaming, UI, and backend improvements.
 
-- Web UI: refreshed logo, cleaner navigation, mobile UI/UX improvements, and a model-load progress bar below the model picker.
-- Models: added LFM2.5-ColBERT and LFM2.5-Embedding support, plus an unlimited-OCR multimodal converter.
-- Backends: Vulkan, OpenCL, SYCL, and Hexagon fixes and performance improvements.
+- Server: SSE replay buffer so streaming responses can resume after a dropped connection; disabled features now return HTTP 403.
+- Web UI: fixed the always-show-sidebar setting after the navigation refactor, plus accessibility fixes for hover-gated controls.
+- Backends: SYCL tensor parallelism (--split-mode tensor), Vulkan and OpenCL performance fixes, and a CUDA integer-overflow fix in binary ops.
 
-Full changelog: https://github.com/ggml-org/llama.cpp/compare/b9776...b9787`,
-    es_ES: `Se actualizó llama.cpp a b9787. Versión de mantenimiento centrada en la interfaz web y el soporte de nuevos modelos/backends.
+Full changelog: https://github.com/ggml-org/llama.cpp/compare/b9787...b9828`,
+    es_ES: `Se actualizó llama.cpp a b9828. Versión de mantenimiento con mejoras de streaming, interfaz y backends.
 
-- Interfaz web: logotipo renovado, navegación más limpia, mejoras de UI/UX en móvil y una barra de progreso de carga del modelo bajo el selector de modelos.
-- Modelos: se añadió soporte para LFM2.5-ColBERT y LFM2.5-Embedding, además de un convertidor multimodal OCR sin límites.
-- Backends: correcciones y mejoras de rendimiento en Vulkan, OpenCL, SYCL y Hexagon.
+- Servidor: búfer de reproducción SSE para que las respuestas en streaming puedan reanudarse tras una conexión perdida; las funciones desactivadas ahora devuelven HTTP 403.
+- Interfaz web: se corrigió el ajuste de barra lateral siempre visible tras la refactorización de navegación, además de correcciones de accesibilidad para controles que requieren pasar el cursor.
+- Backends: paralelismo de tensores en SYCL (--split-mode tensor), correcciones de rendimiento en Vulkan y OpenCL, y una corrección de desbordamiento de enteros en CUDA en operaciones binarias.
 
-Registro de cambios completo: https://github.com/ggml-org/llama.cpp/compare/b9776...b9787`,
-    de_DE: `llama.cpp auf b9787 aktualisiert. Ein Wartungs-Release mit Schwerpunkt auf der Web-Oberfläche und Unterstützung neuer Modelle/Backends.
+Registro de cambios completo: https://github.com/ggml-org/llama.cpp/compare/b9787...b9828`,
+    de_DE: `llama.cpp auf b9828 aktualisiert. Ein Wartungs-Release mit Verbesserungen bei Streaming, Oberfläche und Backends.
 
-- Web-Oberfläche: überarbeitetes Logo, übersichtlichere Navigation, mobile UI/UX-Verbesserungen und ein Ladefortschrittsbalken für das Modell unter der Modellauswahl.
-- Modelle: Unterstützung für LFM2.5-ColBERT und LFM2.5-Embedding sowie ein multimodaler Unlimited-OCR-Konverter hinzugefügt.
-- Backends: Korrekturen und Leistungsverbesserungen für Vulkan, OpenCL, SYCL und Hexagon.
+- Server: SSE-Replay-Puffer, damit Streaming-Antworten nach einer abgebrochenen Verbindung fortgesetzt werden können; deaktivierte Funktionen geben jetzt HTTP 403 zurück.
+- Web-Oberfläche: behobene Einstellung „Seitenleiste immer anzeigen“ nach dem Navigations-Refactoring sowie Barrierefreiheits-Korrekturen für Hover-gesteuerte Elemente.
+- Backends: SYCL-Tensorparallelität (--split-mode tensor), Leistungskorrekturen für Vulkan und OpenCL sowie eine Korrektur eines Integer-Überlaufs in CUDA bei binären Operationen.
 
-Vollständiges Änderungsprotokoll: https://github.com/ggml-org/llama.cpp/compare/b9776...b9787`,
-    pl_PL: `Zaktualizowano llama.cpp do b9787. Wydanie konserwacyjne skupione na interfejsie webowym oraz obsłudze nowych modeli/backendów.
+Vollständiges Änderungsprotokoll: https://github.com/ggml-org/llama.cpp/compare/b9787...b9828`,
+    pl_PL: `Zaktualizowano llama.cpp do b9828. Wydanie konserwacyjne z usprawnieniami streamingu, interfejsu i backendów.
 
-- Interfejs webowy: odświeżone logo, czytelniejsza nawigacja, usprawnienia UI/UX na urządzeniach mobilnych oraz pasek postępu ładowania modelu pod selektorem modeli.
-- Modele: dodano obsługę LFM2.5-ColBERT i LFM2.5-Embedding oraz multimodalny konwerter OCR bez ograniczeń.
-- Backendy: poprawki i usprawnienia wydajności dla Vulkan, OpenCL, SYCL i Hexagon.
+- Serwer: bufor odtwarzania SSE, dzięki któremu odpowiedzi strumieniowe mogą zostać wznowione po zerwaniu połączenia; wyłączone funkcje zwracają teraz HTTP 403.
+- Interfejs webowy: naprawiono ustawienie zawsze widocznego paska bocznego po refaktoryzacji nawigacji oraz poprawki dostępności dla elementów wymagających najechania kursorem.
+- Backendy: równoległość tensorów w SYCL (--split-mode tensor), poprawki wydajności w Vulkan i OpenCL oraz naprawa przepełnienia liczb całkowitych w CUDA w operacjach binarnych.
 
-Pełny dziennik zmian: https://github.com/ggml-org/llama.cpp/compare/b9776...b9787`,
-    fr_FR: `Mise à jour de llama.cpp vers b9787. Une version de maintenance axée sur l'interface web et la prise en charge de nouveaux modèles/backends.
+Pełny dziennik zmian: https://github.com/ggml-org/llama.cpp/compare/b9787...b9828`,
+    fr_FR: `Mise à jour de llama.cpp vers b9828. Une version de maintenance avec des améliorations du streaming, de l'interface et des backends.
 
-- Interface web : logo rafraîchi, navigation simplifiée, améliorations UI/UX sur mobile et une barre de progression du chargement du modèle sous le sélecteur de modèles.
-- Modèles : ajout de la prise en charge de LFM2.5-ColBERT et LFM2.5-Embedding, ainsi qu'un convertisseur multimodal OCR illimité.
-- Backends : corrections et améliorations de performances pour Vulkan, OpenCL, SYCL et Hexagon.
+- Serveur : tampon de relecture SSE permettant aux réponses en streaming de reprendre après une connexion interrompue ; les fonctionnalités désactivées renvoient désormais HTTP 403.
+- Interface web : correction du réglage « toujours afficher la barre latérale » après la refonte de la navigation, ainsi que des correctifs d'accessibilité pour les éléments nécessitant le survol.
+- Backends : parallélisme de tenseurs SYCL (--split-mode tensor), correctifs de performances Vulkan et OpenCL, et correction d'un débordement d'entier CUDA dans les opérations binaires.
 
-Journal des modifications complet : https://github.com/ggml-org/llama.cpp/compare/b9776...b9787`,
+Journal des modifications complet : https://github.com/ggml-org/llama.cpp/compare/b9787...b9828`,
   },
   migrations: {
     up: async ({ effects }) => {},

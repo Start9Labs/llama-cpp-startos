@@ -6,7 +6,7 @@ const variant = process.env.VARIANT || 'generic'
 type Mutable<T> = { -readonly [K in keyof T]: Mutable<T[K]> }
 const mutable = <T>(value: T): Mutable<T> => value as Mutable<T>
 
-const upstreamBuild = 'b9787'
+const upstreamBuild = 'b9828'
 
 const imageConfigs = {
   generic: {
