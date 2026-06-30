@@ -1,43 +1,43 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '1.0.9787:0',
+  version: '1.0.9837:0',
   releaseNotes: {
-    en_US: `Updated llama.cpp to b9787. A maintenance release focused on the web UI and new model/backend support.
+    en_US: `Updated llama.cpp to b9837. A maintenance release with new model support, server/UI improvements, and broad backend fixes.
 
-- Web UI: refreshed logo, cleaner navigation, mobile UI/UX improvements, and a model-load progress bar below the model picker.
-- Models: added LFM2.5-ColBERT and LFM2.5-Embedding support, plus an unlimited-OCR multimodal converter.
-- Backends: Vulkan, OpenCL, SYCL, and Hexagon fixes and performance improvements.
+- Models: added DFlash speculative decoding, MiniCPM5 chat parser, and Eagle3 Qwen3 draft-model support.
+- Server: resumable streaming via an SSE replay buffer, and a clearer 403 status for disabled features.
+- Backends: CUDA, Vulkan, SYCL, and OpenCL fixes and performance improvements; OpenVINO updated to 2026.2.1.
 
-Full changelog: https://github.com/ggml-org/llama.cpp/compare/b9776...b9787`,
-    es_ES: `Se actualizó llama.cpp a b9787. Versión de mantenimiento centrada en la interfaz web y el soporte de nuevos modelos/backends.
+Full changelog: https://github.com/ggml-org/llama.cpp/compare/b9787...b9837`,
+    es_ES: `Se actualizó llama.cpp a b9837. Versión de mantenimiento con soporte para nuevos modelos, mejoras en el servidor/interfaz y correcciones en múltiples backends.
 
-- Interfaz web: logotipo renovado, navegación más limpia, mejoras de UI/UX en móvil y una barra de progreso de carga del modelo bajo el selector de modelos.
-- Modelos: se añadió soporte para LFM2.5-ColBERT y LFM2.5-Embedding, además de un convertidor multimodal OCR sin límites.
-- Backends: correcciones y mejoras de rendimiento en Vulkan, OpenCL, SYCL y Hexagon.
+- Modelos: se añadió decodificación especulativa DFlash, el analizador de chat MiniCPM5 y el soporte de modelo borrador Eagle3 Qwen3.
+- Servidor: transmisión reanudable mediante un búfer de reproducción SSE y un estado 403 más claro para funciones deshabilitadas.
+- Backends: correcciones y mejoras de rendimiento en CUDA, Vulkan, SYCL y OpenCL; OpenVINO actualizado a 2026.2.1.
 
-Registro de cambios completo: https://github.com/ggml-org/llama.cpp/compare/b9776...b9787`,
-    de_DE: `llama.cpp auf b9787 aktualisiert. Ein Wartungs-Release mit Schwerpunkt auf der Web-Oberfläche und Unterstützung neuer Modelle/Backends.
+Registro de cambios completo: https://github.com/ggml-org/llama.cpp/compare/b9787...b9837`,
+    de_DE: `llama.cpp auf b9837 aktualisiert. Ein Wartungs-Release mit Unterstützung neuer Modelle, Server-/UI-Verbesserungen und umfangreichen Backend-Korrekturen.
 
-- Web-Oberfläche: überarbeitetes Logo, übersichtlichere Navigation, mobile UI/UX-Verbesserungen und ein Ladefortschrittsbalken für das Modell unter der Modellauswahl.
-- Modelle: Unterstützung für LFM2.5-ColBERT und LFM2.5-Embedding sowie ein multimodaler Unlimited-OCR-Konverter hinzugefügt.
-- Backends: Korrekturen und Leistungsverbesserungen für Vulkan, OpenCL, SYCL und Hexagon.
+- Modelle: spekulative Dekodierung DFlash, MiniCPM5-Chat-Parser und Eagle3-Qwen3-Entwurfsmodell-Unterstützung hinzugefügt.
+- Server: fortsetzbares Streaming über einen SSE-Replay-Puffer und ein klarerer 403-Status für deaktivierte Funktionen.
+- Backends: Korrekturen und Leistungsverbesserungen für CUDA, Vulkan, SYCL und OpenCL; OpenVINO auf 2026.2.1 aktualisiert.
 
-Vollständiges Änderungsprotokoll: https://github.com/ggml-org/llama.cpp/compare/b9776...b9787`,
-    pl_PL: `Zaktualizowano llama.cpp do b9787. Wydanie konserwacyjne skupione na interfejsie webowym oraz obsłudze nowych modeli/backendów.
+Vollständiges Änderungsprotokoll: https://github.com/ggml-org/llama.cpp/compare/b9787...b9837`,
+    pl_PL: `Zaktualizowano llama.cpp do b9837. Wydanie konserwacyjne z obsługą nowych modeli, usprawnieniami serwera/interfejsu i szerokimi poprawkami backendów.
 
-- Interfejs webowy: odświeżone logo, czytelniejsza nawigacja, usprawnienia UI/UX na urządzeniach mobilnych oraz pasek postępu ładowania modelu pod selektorem modeli.
-- Modele: dodano obsługę LFM2.5-ColBERT i LFM2.5-Embedding oraz multimodalny konwerter OCR bez ograniczeń.
-- Backendy: poprawki i usprawnienia wydajności dla Vulkan, OpenCL, SYCL i Hexagon.
+- Modele: dodano dekodowanie spekulatywne DFlash, parser czatu MiniCPM5 oraz obsługę modelu roboczego Eagle3 Qwen3.
+- Serwer: wznawialne strumieniowanie dzięki buforowi powtórek SSE oraz czytelniejszy status 403 dla wyłączonych funkcji.
+- Backendy: poprawki i usprawnienia wydajności dla CUDA, Vulkan, SYCL i OpenCL; OpenVINO zaktualizowano do 2026.2.1.
 
-Pełny dziennik zmian: https://github.com/ggml-org/llama.cpp/compare/b9776...b9787`,
-    fr_FR: `Mise à jour de llama.cpp vers b9787. Une version de maintenance axée sur l'interface web et la prise en charge de nouveaux modèles/backends.
+Pełny dziennik zmian: https://github.com/ggml-org/llama.cpp/compare/b9787...b9837`,
+    fr_FR: `Mise à jour de llama.cpp vers b9837. Une version de maintenance avec la prise en charge de nouveaux modèles, des améliorations serveur/interface et de nombreuses corrections de backends.
 
-- Interface web : logo rafraîchi, navigation simplifiée, améliorations UI/UX sur mobile et une barre de progression du chargement du modèle sous le sélecteur de modèles.
-- Modèles : ajout de la prise en charge de LFM2.5-ColBERT et LFM2.5-Embedding, ainsi qu'un convertisseur multimodal OCR illimité.
-- Backends : corrections et améliorations de performances pour Vulkan, OpenCL, SYCL et Hexagon.
+- Modèles : ajout du décodage spéculatif DFlash, de l'analyseur de chat MiniCPM5 et de la prise en charge du modèle brouillon Eagle3 Qwen3.
+- Serveur : diffusion reprenable via un tampon de relecture SSE et un statut 403 plus clair pour les fonctionnalités désactivées.
+- Backends : corrections et améliorations de performances pour CUDA, Vulkan, SYCL et OpenCL ; OpenVINO mis à jour vers 2026.2.1.
 
-Journal des modifications complet : https://github.com/ggml-org/llama.cpp/compare/b9776...b9787`,
+Journal des modifications complet : https://github.com/ggml-org/llama.cpp/compare/b9787...b9837`,
   },
   migrations: {
     up: async ({ effects }) => {},
