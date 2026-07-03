@@ -95,14 +95,6 @@ export const manifest = setupManifest({
         imageConfigs.generic,
     ),
   },
-  alerts: {
-    install: null,
-    update: null,
-    uninstall: null,
-    restore: null,
-    start: null,
-    stop: null,
-  },
   // generic is published, so hardwareAcceleration must be uniform across all
   // variants — it lives in the registry's shared version metadata, and a
   // mismatch (e.g. generic false vs the rest true) rejects publish.

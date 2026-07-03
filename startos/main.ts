@@ -8,7 +8,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
 
   const serveArgs = await storeJson.read((s) => s?.serveArgs).const(effects)
 
-  const subcontainer = await sdk.SubContainer.of(
+  const subcontainer = sdk.SubContainer.of(
     effects,
     { imageId: 'llama-cpp' },
     sdk.Mounts.of().mountVolume({
