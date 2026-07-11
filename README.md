@@ -43,7 +43,7 @@ The package ships four variants, selected at build time via the `VARIANT` env va
 | `rocm`    | `ghcr.io/ggml-org/llama.cpp:server-rocm`   | x86_64          | ROCm (AMD)    | `amdgpu`               |
 | `vulkan`  | `ghcr.io/ggml-org/llama.cpp:server-vulkan` | x86_64, aarch64 | Vulkan        | `i915` (Intel)         |
 
-All four variants publish under a single package version. Each declares a distinct `hardwareRequirements.device` (the host GPU's kernel driver), so StartOS serves each host the most specific variant its detected hardware satisfies — `nvidia`/`rocm`/`vulkan` for matching GPUs, and `generic` as the universal CPU fallback for everything else. Note that `vulkan` matches only Intel GPUs on the `i915` driver; newer Intel GPUs on the `xe` driver (and non-Intel Vulkan-only setups) fall back to `generic`.
+All four variants publish under a single package version. Each declares a distinct `hardwareRequirements.device`, so StartOS serves each host the most specific variant its detected hardware satisfies — `nvidia`/`rocm`/`vulkan` for matching GPUs, and `generic` as the universal CPU fallback for everything else. Note that `vulkan` matches only Intel GPUs on the `i915` driver; newer Intel GPUs on the `xe` driver (and non-Intel Vulkan-only setups) fall back to `generic`. `rocm` matches the `amdgpu` driver but is narrowed by GPU product name to **discrete** AMD GPUs (Navi / Radeon RX / Instinct); integrated Radeon graphics (e.g. the Radeon 680M in Ryzen APUs), where ROCm is unreliable, fall back to `generic`.
 
 | Property     | Value               |
 | ------------ | ------------------- |
