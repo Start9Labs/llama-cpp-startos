@@ -43,7 +43,7 @@ The package ships four variants, selected at build time via the `VARIANT` env va
 | `rocm`    | `ghcr.io/ggml-org/llama.cpp:server-rocm`   | x86_64          | ROCm (AMD)    | `amdgpu`               |
 | `vulkan`  | `ghcr.io/ggml-org/llama.cpp:server-vulkan` | x86_64, aarch64 | Vulkan        | `i915` (Intel)         |
 
-All four variants publish under a single package version. Each declares a distinct `hardwareRequirements.device`, so StartOS serves each host the most specific variant its detected hardware satisfies — `nvidia`/`rocm`/`vulkan` for matching GPUs, and `generic` as the universal CPU fallback for everything else. Note that `vulkan` matches only Intel GPUs on the `i915` driver; newer Intel GPUs on the `xe` driver (and non-Intel Vulkan-only setups) fall back to `generic`. `rocm` matches the `amdgpu` driver but is narrowed by GPU product name to **discrete** AMD GPUs (Navi / Radeon RX / Instinct); integrated Radeon graphics (e.g. the Radeon 680M in Ryzen APUs), where ROCm is unreliable, fall back to `generic`.
+All four variants publish under a single package version. Each declares a distinct `hardwareRequirements.device`, so StartOS serves each host the most specific variant its detected hardware satisfies — `nvidia`/`rocm`/`vulkan` for matching GPUs, and `generic` as the universal CPU fallback for everything else. Note that `vulkan` matches only Intel GPUs on the `i915` driver; newer Intel GPUs on the `xe` driver (and non-Intel Vulkan-only setups) fall back to `generic`. `rocm` matches the `amdgpu` driver but is narrowed by GPU product name to **discrete** AMD GPUs (Navi / Radeon RX / Instinct); integrated Radeon graphics (e.g. the Radeon 680M in Ryzen APUs), where ROCm is unreliable, fall back to `generic`. `nvidia` matches the `nvidia` driver, which is present only when StartOS is installed from a `-nvidia` platform flavor (`x86_64-nvidia` / `aarch64-nvidia`, bundling the NVIDIA driver and container toolkit); on the standard or `-nonfree` flavors an NVIDIA card isn't detected and falls back to `generic` (CPU), even with the card physically present.
 
 | Property     | Value               |
 | ------------ | ------------------- |
@@ -56,7 +56,7 @@ All four variants publish under a single package version. Each declares a distin
 ## Volume and Data Layout
 
 | Volume | Mount Point | Purpose                                              |
-| ------ | ----------- | --------------------------------------------------- |
+| ------ | ----------- | ---------------------------------------------------- |
 | `main` | `/data`     | `store.json` (serve args) and `models/` (GGUF cache) |
 
 The container runs with `LLAMA_CACHE=/data/models` and `HF_HOME=/data/huggingface`, so all `-hf <repo>` downloads land on the persistent volume.
@@ -65,12 +65,12 @@ The container runs with `LLAMA_CACHE=/data/models` and `HF_HOME=/data/huggingfac
 
 ## Installation and First-Run Flow
 
-| Step            | StartOS                                                                                                                               |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Install         | Marketplace install or sideload `.s9pk`                                                                                               |
+| Step            | StartOS                                                                                                                                                                                                                         |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Install         | Marketplace install or sideload `.s9pk`                                                                                                                                                                                         |
 | First-run tasks | Two `critical` tasks: **Set UI Password** (created whenever no password is set) and **Set Model** (created whenever no model is selected). Both are created on install and re-surface if the underlying value is later cleared. |
-| Start service   | After **Set Model** has been run; until then the daemon idles                                                                         |
-| Pull the model  | Automatic on first start (cached on the `main` volume)                                                                                |
+| Start service   | After **Set Model** has been run; until then the daemon idles                                                                                                                                                                   |
+| Pull the model  | Automatic on first start (cached on the `main` volume)                                                                                                                                                                          |
 
 Until **Set Model** has been run, the daemon stays in an idle (`sleep infinity`) state and the API port is closed — the health check reports "No model selected." Once a model is selected, llama-server is restarted with the chosen serve arguments.
 
@@ -141,10 +141,10 @@ The full surface area is documented in upstream `tools/server/README.md`.
 
 ## Actions (StartOS UI)
 
-| Action                  | Purpose                                                                                                                                                   |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Action                 | Purpose                                                                                                                                                   |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Set Model**          | Choose a curated preset (with hardware-tier-aware availability) or a custom HuggingFace GGUF. Writes `serveArgs` to `store.json` and restarts the daemon. |
-| **Set UI Password**    | Generate (or rotate) the web UI login password. Username is always `admin`. Returns the new credentials; the proxy gate picks them up automatically.       |
+| **Set UI Password**    | Generate (or rotate) the web UI login password. Username is always `admin`. Returns the new credentials; the proxy gate picks them up automatically.      |
 | **Delete Model Cache** | Remove a specific filename from `/data/models` to reclaim disk space.                                                                                     |
 
 ---
@@ -216,12 +216,12 @@ variants: # all publish under one version; StartOS matches by detected GPU drive
     image: ghcr.io/ggml-org/llama.cpp:server-cuda
     arch: [x86_64, aarch64]
     accel: cuda
-    gpu_driver: nvidia
+    gpu_driver: nvidia # present only on -nvidia StartOS flavors; CPU fallback otherwise
   rocm:
     image: ghcr.io/ggml-org/llama.cpp:server-rocm
     arch: [x86_64]
     accel: rocm
-    gpu_driver: amdgpu
+    gpu_driver: amdgpu # discrete AMD GPU only (integrated Radeon -> generic)
   vulkan:
     image: ghcr.io/ggml-org/llama.cpp:server-vulkan
     arch: [x86_64, aarch64]
