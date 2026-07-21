@@ -1,7 +1,7 @@
 import { i18n } from './i18n'
 import { sdk } from './sdk'
 import { storeJson } from './fileModels/store.json'
-import { apiPort, uiUsername } from './utils'
+import { apiHostId, apiPort, uiUsername } from './utils'
 
 export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
   // llama-server itself runs keyless; the OS reverse proxy enforces basic auth
@@ -10,7 +10,7 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
   const password =
     (await storeJson.read((s) => s?.uiPassword).const(effects)) ?? ''
 
-  const apiMulti = sdk.MultiHost.of(effects, 'api-multi')
+  const apiMulti = sdk.MultiHost.of(effects, apiHostId)
   const apiMultiOrigin = await apiMulti.bindPort(apiPort, {
     protocol: 'http',
     addSsl: {

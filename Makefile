@@ -2,7 +2,7 @@
 ARCHES := x86 arm
 TARGETS := generic nvidia rocm vulkan
 
-include s9pk.mk
+include node_modules/@start9labs/start-sdk/s9pk.mk
 
 .PHONY += generic nvidia rocm vulkan
 

@@ -6,7 +6,7 @@ const variant = process.env.VARIANT || 'generic'
 type Mutable<T> = { -readonly [K in keyof T]: Mutable<T[K]> }
 const mutable = <T>(value: T): Mutable<T> => value as Mutable<T>
 
-const upstreamBuild = 'b9837'
+const upstreamBuild = 'b9994'
 
 const imageConfigs = {
   generic: {
@@ -94,14 +94,6 @@ export const manifest = setupManifest({
       imageConfigs[variant as keyof typeof imageConfigs] ??
         imageConfigs.generic,
     ),
-  },
-  alerts: {
-    install: null,
-    update: null,
-    uninstall: null,
-    restore: null,
-    start: null,
-    stop: null,
   },
   // generic is published, so hardwareAcceleration must be uniform across all
   // variants — it lives in the registry's shared version metadata, and a
