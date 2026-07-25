@@ -197,7 +197,7 @@ Backups can be very large depending on how many models you've cached — a singl
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for build instructions and development workflow, and [UPDATING.md](UPDATING.md) for the upstream-bump procedure.
+Build and development workflow follow the StartOS packaging guide: <https://docs.start9.com/packaging>. Keep `README.md`, `instructions.md`, and `AGENTS.md` in sync with any change to user-visible behavior or package structure. See [UPDATING.md](UPDATING.md) for the upstream-bump procedure.
 
 ---
 
