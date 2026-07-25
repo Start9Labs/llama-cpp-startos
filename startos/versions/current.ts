@@ -1,7 +1,7 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '1.0.9994:1',
+  version: '1.0.9994:2',
   releaseNotes: {
     en_US: `Updated llama.cpp to build b9994.
 
