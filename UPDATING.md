@@ -20,15 +20,17 @@ All four variants are cut from the same upstream commit and bump together.
 >
 > Pinning a release whose images don't exist is not caught at pack time. It fails every CI build with `failed to resolve reference ... not found`. **Find the newest build that actually has images, and pin that** — the answer is often well below the newest release, and you cannot assume the image-bearing builds are contiguous.
 
-Ask GHCR what it has actually published, rather than asking GitHub what was released. This lists any `server-bNNNN` tags newer than the build currently pinned in `startos/manifest/index.ts` (`server-b` tags sort lexically the same as numerically while build numbers keep their digit count):
+Ask GHCR what it has actually published, rather than asking GitHub what was released. GHCR pages its tag list in publication order, so `last=server-${CURRENT}` returns everything published after the current pin. Sort those numerically — build numbers crossed from four to five digits at `b10000`, so lexical order no longer matches numeric order:
 
 ```sh
-CURRENT=b9982   # ← the `upstreamBuild` currently in startos/manifest/index.ts
+CURRENT=b10156   # ← the `upstreamBuild` currently in startos/manifest/index.ts
 TOKEN=$(curl -s "https://ghcr.io/token?scope=repository:ggml-org/llama.cpp:pull" | jq -r .token)
 curl -s -H "Authorization: Bearer $TOKEN" \
   "https://ghcr.io/v2/ggml-org/llama.cpp/tags/list?n=1000&last=server-${CURRENT}" \
-  | jq -r '[.tags[] | select(test("^server-b[0-9]+$"))]
-           | if length == 0 then "none newer — the current pin is the newest published build" else .[] end'
+  | jq -r '[.tags[] | select(test("^server-b[0-9]+$")) | ltrimstr("server-b") | tonumber]
+           | sort | map("b" + tostring)
+           | if length == 0 then ["none newer — the current pin is the newest published build"] else . end
+           | .[]'
 ```
 
 Take the highest build it prints, then **confirm all four variants exist for it** — the four are published together, but verify rather than assume, since a partial publish would break only some build targets:
@@ -55,7 +57,7 @@ If any variant is `MISSING`, step down to the next build the tag-list query retu
 
 ## Applying the bump
 
-1. Update `const upstreamBuild` in `startos/manifest/index.ts` to the verified-published build tag (e.g. `'b9982'`) — the one you confirmed all four variants for above, not merely the newest release.
+1. Update `const upstreamBuild` in `startos/manifest/index.ts` to the verified-published build tag (e.g. `'b10156'`) — the one you confirmed all four variants for above, not merely the newest release.
 2. Bump `version` + `releaseNotes` in `startos/versions/current.ts`. Edit in place — the file name stays `current.ts`; spin off a new file only if the bump needs a migration.
 3. Skim the upstream commit range for breaking flag/server-API changes that might invalidate the presets in `startos/actions/presets.ts`. Build numbers are dense (dozens per day), so most bumps are uneventful — but `llama-server` does occasionally rename flags.
 4. Build and verify at least the `generic` variant: `make generic`.
