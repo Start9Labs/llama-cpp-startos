@@ -1,58 +1,63 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '1.0.10438:0',
+  version: '1.0.10450:0',
   releaseNotes: {
-    en_US: `Updated llama.cpp to build b10438.
+    en_US: `Updated llama.cpp to build b10450.
 
-- A routine maintenance bump — 40 builds since b10398.
-- The server now answers \`/metrics\` and \`/slots\` while a request is being processed, so monitoring no longer stalls behind generation, and several metrics were corrected.
-- The built-in chat UI is served with no-cache, so upgrades take effect without a manual browser refresh.
-- Adds support for the MiniMax Text-01 and MiniMax-M1 model families.
-- Fixes tool calling with LFM2 models and image handling with Granite 4 vision models.
-- Speculative decoding now auto-detects the draft model type from the draft GGUF's metadata.
+- A small maintenance bump — 12 builds since b10438.
+- Adds support for the Kimi-K3 text model family.
+- The server's request queue was reworked, improving behaviour under concurrent requests.
+- Vulkan: better performance on Intel Xe graphics, and a workaround for a problematic Intel driver version.
+- The built-in chat UI now masks the API key field so browsers stop offering to save it.
+- More robust GGUF parsing — malformed model metadata is rejected instead of misread.
+- The \`--mmap\`/\`--no-mmap\`/\`--mlock\` flags are now deprecated in favour of \`--load-mode\`. They still work; if you pass them through **Set Model**'s extra arguments, switch when convenient.
 
-llama.cpp publishes one build per merged commit and does not provide a per-build changelog. Full commit range: https://github.com/ggml-org/llama.cpp/compare/b10398...b10438`,
-    es_ES: `Actualiza llama.cpp a la compilación b10438.
+llama.cpp publishes one build per merged commit and does not provide a per-build changelog. Full commit range: https://github.com/ggml-org/llama.cpp/compare/b10438...b10450`,
+    es_ES: `Actualiza llama.cpp a la compilación b10450.
 
-- Una actualización de mantenimiento rutinaria: 40 compilaciones desde la b10398.
-- El servidor ahora responde a \`/metrics\` y \`/slots\` mientras procesa una petición, por lo que la supervisión ya no queda bloqueada tras la generación, y se han corregido varias métricas.
-- La interfaz de chat integrada se sirve sin caché, de modo que las actualizaciones surten efecto sin recargar manualmente el navegador.
-- Añade compatibilidad con las familias de modelos MiniMax Text-01 y MiniMax-M1.
-- Corrige la llamada a herramientas con modelos LFM2 y el tratamiento de imágenes con los modelos de visión Granite 4.
-- La decodificación especulativa detecta ahora automáticamente el tipo de modelo borrador a partir de los metadatos de su GGUF.
+- Una pequeña actualización de mantenimiento: 12 compilaciones desde la b10438.
+- Añade compatibilidad con la familia de modelos de texto Kimi-K3.
+- Se ha rediseñado la cola de peticiones del servidor, mejorando su comportamiento con peticiones simultáneas.
+- Vulkan: mejor rendimiento en gráficos Intel Xe y una solución alternativa para una versión problemática del controlador de Intel.
+- La interfaz de chat integrada ahora enmascara el campo de la clave de API para que el navegador no ofrezca guardarla.
+- Análisis de GGUF más robusto: los metadatos de modelo mal formados se rechazan en lugar de interpretarse mal.
+- Las opciones \`--mmap\`/\`--no-mmap\`/\`--mlock\` quedan obsoletas en favor de \`--load-mode\`. Siguen funcionando; si las pasa como argumentos adicionales en **Set Model**, cámbielas cuando le resulte cómodo.
 
-llama.cpp publica una compilación por cada commit fusionado y no ofrece un registro de cambios por compilación. Rango completo de commits: https://github.com/ggml-org/llama.cpp/compare/b10398...b10438`,
-    de_DE: `Aktualisiert llama.cpp auf Build b10438.
+llama.cpp publica una compilación por cada commit fusionado y no ofrece un registro de cambios por compilación. Rango completo de commits: https://github.com/ggml-org/llama.cpp/compare/b10438...b10450`,
+    de_DE: `Aktualisiert llama.cpp auf Build b10450.
 
-- Ein routinemäßiges Wartungsupdate – 40 Builds seit b10398.
-- Der Server beantwortet \`/metrics\` und \`/slots\` jetzt auch während der Verarbeitung einer Anfrage, sodass die Überwachung nicht mehr hinter der Generierung hängen bleibt; zudem wurden mehrere Metriken korrigiert.
-- Die integrierte Chat-Oberfläche wird ohne Caching ausgeliefert, sodass Aktualisierungen ohne manuelles Neuladen des Browsers wirksam werden.
-- Ergänzt Unterstützung für die Modellfamilien MiniMax Text-01 und MiniMax-M1.
-- Behebt Werkzeugaufrufe mit LFM2-Modellen sowie die Bildverarbeitung mit den Granite-4-Vision-Modellen.
-- Die spekulative Dekodierung erkennt den Typ des Entwurfsmodells jetzt automatisch anhand der Metadaten der Entwurfs-GGUF.
+- Ein kleines Wartungsupdate – 12 Builds seit b10438.
+- Ergänzt Unterstützung für die Textmodellfamilie Kimi-K3.
+- Die Anfrage-Warteschlange des Servers wurde überarbeitet, was das Verhalten bei gleichzeitigen Anfragen verbessert.
+- Vulkan: bessere Leistung auf Intel-Xe-Grafik sowie eine Umgehung für eine problematische Intel-Treiberversion.
+- Die integrierte Chat-Oberfläche maskiert das Feld für den API-Schlüssel, damit Browser dessen Speicherung nicht mehr anbieten.
+- Robustere GGUF-Auswertung: fehlerhafte Modell-Metadaten werden abgelehnt statt falsch gelesen.
+- Die Optionen \`--mmap\`/\`--no-mmap\`/\`--mlock\` gelten zugunsten von \`--load-mode\` als veraltet. Sie funktionieren weiterhin; wenn Sie sie über die zusätzlichen Argumente von **Set Model** übergeben, stellen Sie bei Gelegenheit um.
 
-llama.cpp veröffentlicht einen Build pro zusammengeführtem Commit und stellt kein Änderungsprotokoll je Build bereit. Vollständiger Commit-Bereich: https://github.com/ggml-org/llama.cpp/compare/b10398...b10438`,
-    pl_PL: `Aktualizuje llama.cpp do kompilacji b10438.
+llama.cpp veröffentlicht einen Build pro zusammengeführtem Commit und stellt kein Änderungsprotokoll je Build bereit. Vollständiger Commit-Bereich: https://github.com/ggml-org/llama.cpp/compare/b10438...b10450`,
+    pl_PL: `Aktualizuje llama.cpp do kompilacji b10450.
 
-- Rutynowa aktualizacja konserwacyjna — 40 kompilacji od b10398.
-- Serwer odpowiada teraz na \`/metrics\` i \`/slots\` również w trakcie przetwarzania żądania, więc monitorowanie nie czeka już na zakończenie generowania; poprawiono także kilka metryk.
-- Wbudowany interfejs czatu jest serwowany bez pamięci podręcznej, dzięki czemu aktualizacje działają bez ręcznego odświeżania przeglądarki.
-- Dodaje obsługę rodzin modeli MiniMax Text-01 i MiniMax-M1.
-- Poprawia wywoływanie narzędzi w modelach LFM2 oraz obsługę obrazów w modelach wizyjnych Granite 4.
-- Dekodowanie spekulacyjne automatycznie rozpoznaje typ modelu roboczego na podstawie metadanych jego pliku GGUF.
+- Niewielka aktualizacja konserwacyjna — 12 kompilacji od b10438.
+- Dodaje obsługę rodziny modeli tekstowych Kimi-K3.
+- Przeprojektowano kolejkę żądań serwera, co poprawia zachowanie przy równoczesnych żądaniach.
+- Vulkan: lepsza wydajność na układach graficznych Intel Xe oraz obejście problematycznej wersji sterownika Intela.
+- Wbudowany interfejs czatu maskuje teraz pole klucza API, dzięki czemu przeglądarka nie proponuje jego zapisania.
+- Solidniejsze przetwarzanie plików GGUF — błędne metadane modelu są odrzucane zamiast błędnie odczytywane.
+- Opcje \`--mmap\`/\`--no-mmap\`/\`--mlock\` są przestarzałe na rzecz \`--load-mode\`. Nadal działają; jeśli przekazujesz je w dodatkowych argumentach akcji **Set Model**, zmień je przy okazji.
 
-llama.cpp publikuje jedną kompilację na scalony commit i nie udostępnia listy zmian dla poszczególnych kompilacji. Pełny zakres commitów: https://github.com/ggml-org/llama.cpp/compare/b10398...b10438`,
-    fr_FR: `Met à jour llama.cpp vers la version b10438.
+llama.cpp publikuje jedną kompilację na scalony commit i nie udostępnia listy zmian dla poszczególnych kompilacji. Pełny zakres commitów: https://github.com/ggml-org/llama.cpp/compare/b10438...b10450`,
+    fr_FR: `Met à jour llama.cpp vers la version b10450.
 
-- Une mise à jour de maintenance de routine — 40 versions depuis la b10398.
-- Le serveur répond désormais à \`/metrics\` et \`/slots\` pendant le traitement d'une requête : la supervision n'attend plus la fin de la génération, et plusieurs métriques ont été corrigées.
-- L'interface de discussion intégrée est servie sans mise en cache, si bien que les mises à jour s'appliquent sans rechargement manuel du navigateur.
-- Ajoute la prise en charge des familles de modèles MiniMax Text-01 et MiniMax-M1.
-- Corrige l'appel d'outils avec les modèles LFM2 et le traitement des images avec les modèles de vision Granite 4.
-- Le décodage spéculatif détecte maintenant automatiquement le type du modèle brouillon à partir des métadonnées de son GGUF.
+- Une petite mise à jour de maintenance — 12 versions depuis la b10438.
+- Ajoute la prise en charge de la famille de modèles de texte Kimi-K3.
+- La file d'attente des requêtes du serveur a été repensée, ce qui améliore le comportement en cas de requêtes simultanées.
+- Vulkan : meilleures performances sur les cartes graphiques Intel Xe et contournement d'une version problématique du pilote Intel.
+- L'interface de discussion intégrée masque désormais le champ de la clé d'API, afin que le navigateur ne propose plus de l'enregistrer.
+- Analyse des fichiers GGUF plus robuste : des métadonnées de modèle malformées sont rejetées au lieu d'être mal interprétées.
+- Les options \`--mmap\`/\`--no-mmap\`/\`--mlock\` sont désormais obsolètes au profit de \`--load-mode\`. Elles fonctionnent toujours ; si vous les passez dans les arguments supplémentaires de **Set Model**, changez-les à votre convenance.
 
-llama.cpp publie une version par commit fusionné et ne fournit pas de journal des modifications par version. Plage complète des commits : https://github.com/ggml-org/llama.cpp/compare/b10398...b10438`,
+llama.cpp publie une version par commit fusionné et ne fournit pas de journal des modifications par version. Plage complète des commits : https://github.com/ggml-org/llama.cpp/compare/b10438...b10450`,
   },
   migrations: {
     up: async ({ effects }) => {},
