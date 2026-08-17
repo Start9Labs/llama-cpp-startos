@@ -14,25 +14,19 @@ const dict = {
 
   // actions/setModel.ts
   'Set Model': 7,
-  'Pick a curated GGUF preset sized for your hardware, or supply a custom HuggingFace model. The model will be downloaded on first startup if not already cached.':
-    8,
-  'Changing the model will restart the service and may require downloading a new model.':
-    9,
+  'Pick a curated GGUF preset sized for your hardware, or supply a custom HuggingFace model. The model will be downloaded on first startup if not already cached.': 8,
+  'Changing the model will restart the service and may require downloading a new model.': 9,
   Configuration: 10,
   'HuggingFace repo': 11,
-  'A HuggingFace GGUF repo, optionally with a quant tag (e.g. `unsloth/Qwen2.5-7B-Instruct-GGUF:Q4_K_M`).':
-    12,
+  'A HuggingFace GGUF repo, optionally with a quant tag (e.g. `unsloth/Qwen2.5-7B-Instruct-GGUF:Q4_K_M`).': 12,
   'HuggingFace file (optional)': 13,
-  'Specific GGUF filename inside the repo. Leave empty to let llama-server pick.':
-    14,
+  'Specific GGUF filename inside the repo. Leave empty to let llama-server pick.': 14,
   'Context size': 15,
   'Maximum context length in tokens. 0 uses the model default.': 16,
   'GPU layers': 17,
-  'Number of model layers to offload to GPU. Use a large value (e.g. 999) to offload everything; ignored on the generic CPU variant.':
-    18,
+  'Number of model layers to offload to GPU. Use a large value (e.g. 999) to offload everything; ignored on the generic CPU variant.': 18,
   'Extra arguments': 19,
-  'Additional `llama-server` flags, space-separated. Advanced — split on whitespace, so quoted values will not survive.':
-    20,
+  'Additional `llama-server` flags, space-separated. Advanced — split on whitespace, so quoted values will not survive.': 20,
   Custom: 21,
 
   // model preset labels
@@ -50,17 +44,13 @@ const dict = {
   'Delete Model Cache': 31,
   'Remove a downloaded GGUF model from the cache to free up disk space': 32,
   'Cached file': 33,
-  'Filename inside `/data/models` to delete (e.g. `Qwen2.5-7B-Instruct-Q4_K_M.gguf`).':
-    34,
-  'This will permanently delete the cached file. The model will be re-downloaded if selected again.':
-    35,
+  'Filename inside `/data/models` to delete (e.g. `Qwen2.5-7B-Instruct-Q4_K_M.gguf`).': 34,
+  'This will permanently delete the cached file. The model will be re-downloaded if selected again.': 35,
 
   // actions/setUiPassword.ts
   'Set UI Password': 36,
-  'Generate a new password for logging in to the llama.cpp web UI. The username is always "admin".':
-    37,
-  'This replaces any existing password. Update saved logins after running it.':
-    38,
+  'Generate a new password for logging in to the llama.cpp web UI. The username is always "admin".': 37,
+  'This replaces any existing password. Update saved logins after running it.': 38,
 
   // init/initializeService.ts
   'Generate a password to log in to the llama.cpp web UI': 39,
