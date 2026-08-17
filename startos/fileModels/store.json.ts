@@ -7,11 +7,15 @@ const shape = z.object({
   modelSelection: z
     .object({
       selection: z.string(),
-      hfRepo: z.string().optional(),
-      hfFile: z.string().optional(),
-      ctx: z.number().optional(),
-      ngl: z.number().optional(),
-      extraArgs: z.string().optional(),
+      custom: z
+        .object({
+          hfRepo: z.string(),
+          hfFile: z.string().optional(),
+          ctx: z.number(),
+          ngl: z.number(),
+          extraArgs: z.string().optional(),
+        })
+        .optional(),
     })
     .optional()
     .catch(undefined),

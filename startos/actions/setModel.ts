@@ -116,28 +116,8 @@ export const setModel = sdk.Action.withInput(
   async ({ effects }) => {
     const saved = await storeJson.read((s) => s?.modelSelection).const(effects)
     if (!saved || !(saved.selection in allVariants)) return {}
-    if (saved.selection === 'custom') {
-      return {
-        config: {
-          selection: 'custom' as const,
-          value: {
-            hfRepo: saved.hfRepo ?? '',
-            hfFile: saved.hfFile ?? null,
-            ctx: saved.ctx ?? 8192,
-            ngl: saved.ngl ?? 999,
-            extraArgs: saved.extraArgs ?? null,
-          },
-        },
-      }
-    }
-    // The SDK's prefill type is a discriminated union by `selection`; the
-    // cast picks one representative variant to satisfy TS, while at runtime
-    // `selection` is just looked up in `allVariants` by key.
     return {
-      config: {
-        selection: saved.selection as 'llama-32-1b',
-        value: {},
-      },
+      config: { selection: saved.selection, value: saved.custom ?? {} },
     }
   },
 
@@ -146,11 +126,15 @@ export const setModel = sdk.Action.withInput(
     let serveArgs: string[]
     let modelSelection: {
       selection: string
-      hfRepo?: string
-      hfFile?: string
-      ctx?: number
-      ngl?: number
-      extraArgs?: string
+      custom:
+        | {
+            hfRepo: string
+            hfFile?: string
+            ctx: number
+            ngl: number
+            extraArgs?: string
+          }
+        | undefined
     }
     if (config.selection === 'custom') {
       const v = config.value
@@ -165,11 +149,13 @@ export const setModel = sdk.Action.withInput(
       }
       modelSelection = {
         selection: 'custom',
-        hfRepo: v.hfRepo,
-        hfFile: v.hfFile?.trim() || undefined,
-        ctx: v.ctx,
-        ngl: v.ngl,
-        extraArgs: v.extraArgs?.trim() || undefined,
+        custom: {
+          hfRepo: v.hfRepo,
+          hfFile: v.hfFile?.trim() || undefined,
+          ctx: v.ctx,
+          ngl: v.ngl,
+          extraArgs: v.extraArgs?.trim() || undefined,
+        },
       }
     } else {
       const preset = models.find((m) => m.id === config.selection)
@@ -180,7 +166,7 @@ export const setModel = sdk.Action.withInput(
       if (preset.hfFile) serveArgs.push('-hff', preset.hfFile)
       serveArgs.push('-c', String(preset.defaultCtx))
       if (isGpuVariant) serveArgs.push('-ngl', '999')
-      modelSelection = { selection: config.selection }
+      modelSelection = { selection: config.selection, custom: undefined }
     }
     await storeJson.merge(effects, { serveArgs, modelSelection })
   },
