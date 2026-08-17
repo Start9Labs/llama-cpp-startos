@@ -84,9 +84,6 @@ export const manifest = setupManifest({
   upstreamRepo: 'https://github.com/ggml-org/llama.cpp',
   marketingUrl: 'https://github.com/ggml-org/llama.cpp',
   donationUrl: null,
-  docsUrls: [
-    'https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md',
-  ],
   description: { short, long },
   volumes: ['main'],
   images: {
