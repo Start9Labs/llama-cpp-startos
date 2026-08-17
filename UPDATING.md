@@ -4,11 +4,11 @@ This package wraps [`ggml-org/llama.cpp`](https://github.com/ggml-org/llama.cpp)
 
 llama.cpp releases use monotonic build numbers of the form `bNNNN` (no semver), one per merged commit. Each release publishes four server image variants on `ghcr.io`:
 
-| Variant   | Image tag                                 | Arches       |
-| --------- | ----------------------------------------- | ------------ |
-| `generic` | `ghcr.io/ggml-org/llama.cpp:server-bNNNN` | amd64, arm64 |
-| `nvidia`  | `ghcr.io/ggml-org/llama.cpp:server-cuda-bNNNN` | amd64, arm64 |
-| `rocm`    | `ghcr.io/ggml-org/llama.cpp:server-rocm-bNNNN` | amd64        |
+| Variant   | Image tag                                        | Arches       |
+| --------- | ------------------------------------------------ | ------------ |
+| `generic` | `ghcr.io/ggml-org/llama.cpp:server-bNNNN`        | amd64, arm64 |
+| `nvidia`  | `ghcr.io/ggml-org/llama.cpp:server-cuda-bNNNN`   | amd64, arm64 |
+| `rocm`    | `ghcr.io/ggml-org/llama.cpp:server-rocm-bNNNN`   | amd64        |
 | `vulkan`  | `ghcr.io/ggml-org/llama.cpp:server-vulkan-bNNNN` | amd64, arm64 |
 
 All four variants are cut from the same upstream commit and bump together.

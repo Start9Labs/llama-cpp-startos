@@ -113,11 +113,29 @@ export const setModel = sdk.Action.withInput(
 
   inputSpec,
 
-  async ({ effects }) => ({}),
+  async ({ effects }) => {
+    const saved = await storeJson.read((s) => s?.modelSelection).const(effects)
+    if (!saved || !(saved.selection in allVariants)) return {}
+    return {
+      config: { selection: saved.selection, value: saved.custom ?? {} },
+    }
+  },
 
   async ({ effects, input }) => {
     const config = input.config
     let serveArgs: string[]
+    let modelSelection: {
+      selection: string
+      custom:
+        | {
+            hfRepo: string
+            hfFile?: string
+            ctx: number
+            ngl: number
+            extraArgs?: string
+          }
+        | undefined
+    }
     if (config.selection === 'custom') {
       const v = config.value
       serveArgs = ['-hf', v.hfRepo]
@@ -129,6 +147,16 @@ export const setModel = sdk.Action.withInput(
       if (v.extraArgs && v.extraArgs.trim().length > 0) {
         serveArgs.push(...v.extraArgs.split(/\s+/).filter(Boolean))
       }
+      modelSelection = {
+        selection: 'custom',
+        custom: {
+          hfRepo: v.hfRepo,
+          hfFile: v.hfFile?.trim() || undefined,
+          ctx: v.ctx,
+          ngl: v.ngl,
+          extraArgs: v.extraArgs?.trim() || undefined,
+        },
+      }
     } else {
       const preset = models.find((m) => m.id === config.selection)
       if (!preset) {
@@ -138,7 +166,8 @@ export const setModel = sdk.Action.withInput(
       if (preset.hfFile) serveArgs.push('-hff', preset.hfFile)
       serveArgs.push('-c', String(preset.defaultCtx))
       if (isGpuVariant) serveArgs.push('-ngl', '999')
+      modelSelection = { selection: config.selection, custom: undefined }
     }
-    await storeJson.merge(effects, { serveArgs })
+    await storeJson.merge(effects, { serveArgs, modelSelection })
   },
 )

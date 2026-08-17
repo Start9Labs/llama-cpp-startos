@@ -4,13 +4,15 @@
 
 # llama.cpp on StartOS
 
-> **Upstream repo:** <https://github.com/ggml-org/llama.cpp>
->
-> **Upstream `llama-server` docs:** <https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md>
->
-> Everything not listed here behaves the same as upstream `llama-server`. If a flag, endpoint, or behavior is not mentioned in this document, upstream documentation is accurate and fully applicable.
+> Everything not listed in this document should behave the same as upstream
+> llama.cpp. If a feature, setting, or behavior is not mentioned here, the
+> upstream documentation is accurate and fully applicable — see the
+> Documentation section of `instructions.md` for links.
 
-[llama.cpp](https://github.com/ggml-org/llama.cpp) is a high-performance C/C++ runtime for large language models in GGUF format. This package wraps its built-in HTTP server (`llama-server`), which exposes an OpenAI-compatible API and a small in-browser chat UI on the same port.
+[llama.cpp](https://github.com/ggml-org/llama.cpp) runs large language models locally and serves them over an OpenAI-compatible API. This package ships one build per accelerator, sizes its model presets to the hardware it finds, and puts authentication in front of a server that has none of its own.
+
+- **Upstream repo:** <https://github.com/ggml-org/llama.cpp>
+- **Wrapper repo:** <https://github.com/Start9Labs/llama-cpp-startos>
 
 ---
 
@@ -18,186 +20,178 @@
 
 - [Image and Container Runtime](#image-and-container-runtime)
 - [Volume and Data Layout](#volume-and-data-layout)
-- [Installation and First-Run Flow](#installation-and-first-run-flow)
-- [Configuration Management](#configuration-management)
-- [Network Access and Interfaces](#network-access-and-interfaces)
-- [Actions (StartOS UI)](#actions-startos-ui)
+- [File Models](#file-models)
 - [Dependencies](#dependencies)
-- [Backups and Restore](#backups-and-restore)
+- [Network Access and Interfaces](#network-access-and-interfaces)
+- [Installation and First-Run Flow](#installation-and-first-run-flow)
+- [Actions](#actions)
+- [Tasks](#tasks)
 - [Health Checks](#health-checks)
+- [Backups and Restore](#backups-and-restore)
 - [Limitations and Differences](#limitations-and-differences)
-- [What Is Unchanged from Upstream](#what-is-unchanged-from-upstream)
-- [Contributing](#contributing)
 - [Quick Reference for AI Consumers](#quick-reference-for-ai-consumers)
 
 ---
 
 ## Image and Container Runtime
 
-The package ships four variants, selected at build time via the `VARIANT` env var (driven by the `Makefile`):
+The upstream image is used unmodified, but **the package is built four times** — one variant per accelerator — and StartOS installs whichever matches your hardware.
 
-| Variant   | Image                                      | Arches          | Accelerator   | Offered to GPU driver  |
-| --------- | ------------------------------------------ | --------------- | ------------- | ---------------------- |
-| `generic` | `ghcr.io/ggml-org/llama.cpp:server`        | x86_64, aarch64 | CPU only      | — (universal fallback) |
-| `nvidia`  | `ghcr.io/ggml-org/llama.cpp:server-cuda`   | x86_64, aarch64 | CUDA (NVIDIA) | `nvidia`               |
-| `rocm`    | `ghcr.io/ggml-org/llama.cpp:server-rocm`   | x86_64          | ROCm (AMD)    | `amdgpu`               |
-| `vulkan`  | `ghcr.io/ggml-org/llama.cpp:server-vulkan` | x86_64, aarch64 | Vulkan        | `i915` (Intel)         |
+| Variant   | Upstream image | Architectures   | Selected when                                |
+| --------- | -------------- | --------------- | -------------------------------------------- |
+| `generic` | CPU server     | x86_64, aarch64 | Nothing more specific matches — the fallback |
+| `nvidia`  | CUDA server    | x86_64, aarch64 | An NVIDIA GPU on the `nvidia` driver         |
+| `rocm`    | ROCm server    | x86_64          | A **discrete** AMD GPU on `amdgpu`           |
+| `vulkan`  | Vulkan server  | x86_64, aarch64 | An Intel GPU on the `i915` driver            |
 
-All four variants publish under a single package version. Each declares a distinct `hardwareRequirements.device`, so StartOS serves each host the most specific variant its detected hardware satisfies — `nvidia`/`rocm`/`vulkan` for matching GPUs, and `generic` as the universal CPU fallback for everything else. Note that `vulkan` matches only Intel GPUs on the `i915` driver; newer Intel GPUs on the `xe` driver (and non-Intel Vulkan-only setups) fall back to `generic`. `rocm` matches the `amdgpu` driver but is narrowed by GPU product name to **discrete** AMD GPUs (Navi / Radeon RX / Instinct); integrated Radeon graphics (e.g. the Radeon 680M in Ryzen APUs), where ROCm is unreliable, fall back to `generic`. `nvidia` matches the `nvidia` driver, which is present only when StartOS is installed from a `-nvidia` platform flavor (`x86_64-nvidia` / `aarch64-nvidia`, bundling the NVIDIA driver and container toolkit); on the standard or `-nonfree` flavors an NVIDIA card isn't detected and falls back to `generic` (CPU), even with the card physically present.
+Selection is StartOS's, from the hardware requirements each variant declares; the most specific compatible one wins, and `generic` is the only variant with no requirement.
 
-| Property     | Value               |
-| ------------ | ------------------- |
-| Entrypoint   | `/app/llama-server` |
-| Working dir  | `/app`              |
-| Default port | 8080                |
+The AMD requirement matches discrete cards by product name rather than excluding integrated ones, because ROCm is unreliable on integrated Radeon graphics and the matcher has no way to express an exclusion.
 
----
+| Subcontainer                                 | Purpose                                          |
+| -------------------------------------------- | ------------------------------------------------ |
+| `llama-cpp-sub`                              | The `primary` daemon, and the one to `attach` to |
+| `detect-nvidia`, `detect-rocm`, `detect-mem` | Temporary; used to size the model presets        |
+| `delete-cache`                               | Temporary; the Delete Model Cache action         |
 
 ## Volume and Data Layout
 
-| Volume | Mount Point | Purpose                                              |
-| ------ | ----------- | ---------------------------------------------------- |
-| `main` | `/data`     | `store.json` (serve args) and `models/` (GGUF cache) |
+One volume, and most of it is downloaded models.
 
-The container runs with `LLAMA_CACHE=/data/models` and `HF_HOME=/data/huggingface`, so all `-hf <repo>` downloads land on the persistent volume.
+| Volume | Mount Point | Purpose                                                                         |
+| ------ | ----------- | ------------------------------------------------------------------------------- |
+| `main` | `/data`     | `store.json`, the GGUF model cache under `models/`, and HuggingFace's own cache |
 
----
+Models are the bulk of it — a single quantized model runs from roughly one to forty gigabytes depending on size.
 
-## Installation and First-Run Flow
+## File Models
 
-| Step            | StartOS                                                                                                                                                                                                                         |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Install         | Marketplace install or sideload `.s9pk`                                                                                                                                                                                         |
-| First-run tasks | Two `critical` tasks: **Set UI Password** (created whenever no password is set) and **Set Model** (created whenever no model is selected). Both are created on install and re-surface if the underlying value is later cleared. |
-| Start service   | After **Set Model** has been run; until then the daemon idles                                                                                                                                                                   |
-| Pull the model  | Automatic on first start (cached on the `main` volume)                                                                                                                                                                          |
+One model. Two of its keys decide whether the service can run at all; the third only exists so a form can remember what you last told it.
 
-Until **Set Model** has been run, the daemon stays in an idle (`sleep infinity`) state and the API port is closed — the health check reports "No model selected." Once a model is selected, llama-server is restarted with the chosen serve arguments.
+| File         | Format | Modelled                | Written by                                |
+| ------------ | ------ | ----------------------- | ----------------------------------------- |
+| `store.json` | JSON   | Yes — `FileHelper.json` | The Set Model and Set UI Password actions |
 
----
+| Key              | Notes                                                                                           |
+| ---------------- | ----------------------------------------------------------------------------------------------- |
+| `serveArgs`      | The full argument list handed to `llama-server`, composed by the Set Model action               |
+| `uiPassword`     | The password for the proxy's basic auth; the username is always `admin`                         |
+| `modelSelection` | What the Set Model form last submitted, so it can be prefilled next time — read by nothing else |
 
-## Configuration Management
+Nothing else writes the file, and neither `serveArgs` nor `uiPassword` is defaulted — both are absent until you run their action, and each absence raises a task.
 
-Serve configuration is stored at `/data/store.json` and managed via the **Set Model** action:
+`modelSelection` holds the chosen `selection` plus, when Custom was chosen, a `custom` object carrying that variant's fields; picking a preset clears `custom`. The daemon never reads it, so it cannot disagree with `serveArgs` about what is actually running — at worst it prefills a form with a stale answer.
 
-```json
-{
-  "serveArgs": [
-    "-hf",
-    "unsloth/Qwen2.5-7B-Instruct-GGUF:Q4_K_M",
-    "-c",
-    "8192",
-    "-ngl",
-    "999"
-  ]
-}
-```
+**No configuration file reaches the application.** Two environment variables are set, both redirecting caches onto the volume so downloaded weights survive a container rebuild:
 
-`serveArgs` is the exact list of arguments appended after `/app/llama-server`. The daemon adds `--host 0.0.0.0` and `--port 8080` at runtime.
+| Variable      | Value               |
+| ------------- | ------------------- |
+| `LLAMA_CACHE` | `/data/models`      |
+| `HF_HOME`     | `/data/huggingface` |
 
-`llama-server` itself runs **keyless** — no `--api-key`. Access is instead gated by HTTP **basic auth enforced at the StartOS reverse proxy** (`addSsl.auth`): the OS validates credentials before any request reaches the container. The username is hard-coded to `admin`; the password is generated by the **Set UI Password** action and stored as `uiPassword` in `store.json`. `setupInterfaces` reads it reactively, so rotating it via the action takes effect without a manual restart. **Set UI Password** is a `critical` task, which blocks the service from starting until a password is set — so the service never runs (and the gate never serves) without one.
-
-Dependent StartOS services reach llama.cpp over the internal service mesh (`http://llama-cpp.startos:8080`), which is not behind the proxy gate, so they connect keyless.
-
-**Curated presets:** the Set Model action surfaces a hardware-tier-aware list of GGUF presets and disables ones too large for the detected memory:
-
-| Preset                         | Repo (`-hf`)                                              | Min memory |
-| ------------------------------ | --------------------------------------------------------- | ---------- |
-| Llama 3.2 1B Instruct          | `unsloth/Llama-3.2-1B-Instruct-GGUF:Q4_K_M`               | 2 GB       |
-| Llama 3.2 3B Instruct          | `unsloth/Llama-3.2-3B-Instruct-GGUF:Q4_K_M`               | 4 GB       |
-| Qwen2.5 7B Instruct            | `unsloth/Qwen2.5-7B-Instruct-GGUF:Q4_K_M`                 | 6 GB       |
-| Llama 3.1 8B Instruct          | `unsloth/Meta-Llama-3.1-8B-Instruct-GGUF:Q4_K_M`          | 8 GB       |
-| Qwen2.5 14B Instruct           | `unsloth/Qwen2.5-14B-Instruct-GGUF:Q4_K_M`                | 12 GB      |
-| Mistral Small 3.2 24B Instruct | `unsloth/Mistral-Small-3.2-24B-Instruct-2506-GGUF:Q4_K_M` | 18 GB      |
-| Qwen3 30B-A3B Instruct         | `unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:Q4_K_M`         | 22 GB      |
-| Qwen2.5 32B Instruct           | `unsloth/Qwen2.5-32B-Instruct-GGUF:Q4_K_M`                | 24 GB      |
-| Llama 3.3 70B Instruct         | `unsloth/Llama-3.3-70B-Instruct-GGUF:Q4_K_M`              | 48 GB      |
-
-The **Custom** variant accepts a HuggingFace repo, optional filename, context size, GPU layer count, and extra `llama-server` flags. For settings that can't be expressed cleanly via the form (quoted JSON, multi-word strings), edit `store.json` directly.
-
----
-
-## Network Access and Interfaces
-
-| Interface        | Port | Protocol | Type | Purpose                                  |
-| ---------------- | ---- | -------- | ---- | ---------------------------------------- |
-| llama.cpp Server | 8080 | HTTP     | `ui` | Built-in chat UI + OpenAI-compatible API |
-
-The chat UI and the API share a single port, gated by basic auth (`admin` + the generated password) at the proxy. Access methods (StartOS 0.4.x): LAN IP, `<hostname>.local`, Tor `.onion`, and custom domains if configured. Browsers get a native login prompt. OpenAI-compatible clients hitting the public interface use base URL `<interface-url>/v1` and must supply the basic-auth credentials (e.g. `curl -u admin:<password>`); other StartOS services use the keyless internal `http://llama-cpp.startos:8080/v1`.
-
-Selected upstream endpoints:
-
-| Endpoint               | Method | Purpose                                          |
-| ---------------------- | ------ | ------------------------------------------------ |
-| `/v1/chat/completions` | POST   | OpenAI-compatible chat                           |
-| `/v1/completions`      | POST   | OpenAI-compatible text completion                |
-| `/v1/embeddings`       | POST   | Embeddings (when the loaded model supports them) |
-| `/health`              | GET    | Health probe                                     |
-| `/props`               | GET    | Loaded model info                                |
-
-The full surface area is documented in upstream `tools/server/README.md`.
-
----
-
-## Actions (StartOS UI)
-
-| Action                 | Purpose                                                                                                                                                   |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Set Model**          | Choose a curated preset (with hardware-tier-aware availability) or a custom HuggingFace GGUF. Writes `serveArgs` to `store.json` and restarts the daemon. |
-| **Set UI Password**    | Generate (or rotate) the web UI login password. Username is always `admin`. Returns the new credentials; the proxy gate picks them up automatically.      |
-| **Delete Model Cache** | Remove a specific filename from `/data/models` to reclaim disk space.                                                                                     |
-
----
+Everything else about how the model is served is in `serveArgs`, and the package always appends the host and port itself so the server binds where the interface expects it.
 
 ## Dependencies
 
 None.
 
----
+## Network Access and Interfaces
 
-## Backups and Restore
+One interface, serving both the OpenAI-compatible API and llama.cpp's built-in chat UI.
 
-**Included in backup:**
+| Interface        | Id    | Type | Port | Description                          |
+| ---------------- | ----- | ---- | ---- | ------------------------------------ |
+| llama.cpp Server | `api` | ui   | 8080 | The API and the built-in chat client |
 
-- `main` volume — `store.json` _and_ all cached GGUF weights under `models/`.
+**Authentication is added by StartOS, not by llama.cpp.** The server itself runs keyless; the binding declares HTTP basic auth at the edge, with the username `admin` and the password from `store.json`. Until a password is set the binding is configured with an empty one — which never serves anything, because the service is blocked from starting by a `critical` task at the same time.
 
-**Restore behavior:**
+An OpenAI-compatible client therefore needs those basic-auth credentials as well as whatever it would normally send.
 
-- Serve args and any locally cached models are restored verbatim. No reconfiguration needed.
+## Installation and First-Run Flow
 
-Backups can be very large depending on how many models you've cached — a single 70B Q4 file is ~40 GB.
+Install writes nothing and the service starts idle: **two `critical` tasks** stand between a fresh install and a working one, and both must be cleared.
 
----
+1. **Set UI Password** — until then there is no credential in front of the API.
+2. **Set Model** — until then there is nothing to serve. The daemon runs but does no work, and its health check says so by name.
+
+Both are raised by a condition rather than at install time, so they reappear if either value is later cleared.
+
+The first start after choosing a model **downloads it**, which is why the health check allows an hour before reporting failure. A large model on a slow connection can take most of that.
+
+## Actions
+
+Three actions, all user-facing.
+
+### Set Model
+
+Chooses what the server runs — either a curated preset or a model of your own.
+
+- **What it changes:** `serveArgs` and `modelSelection` in `store.json`, replacing each entirely.
+- **Cost:** seconds to write, then a restart — and, if the model is not already cached, a download that can take a long time.
+- **Repeat safety:** safe to re-run. Switching back to a previously used model is fast, because the old one is still cached.
+- **The form reopens on your current selection**, read back from `modelSelection`, so changing one setting does not mean re-entering the rest. With nothing chosen yet it falls back to the hardware-filtered default.
+- **Presets are filtered to your hardware.** The form reads the accelerator's memory — VRAM on NVIDIA and ROCm, system memory otherwise — and disables any preset that would not fit, defaulting to the smallest that does. The estimate is the quantized weights plus roughly a quarter for the context cache.
+- **Custom** takes a HuggingFace GGUF repo, optionally a specific file, a context size, a GPU-layer count, and extra server flags. Those extra flags are split on whitespace, so a quoted value with spaces will not survive.
+
+### Set UI Password
+
+Generates the password for the API and chat UI.
+
+- **What it changes:** `uiPassword` in `store.json`, and through it the binding's basic-auth credential.
+- **Cost:** seconds, then a restart.
+- **Repeat safety:** safe to re-run, but it **replaces** the existing password — every saved client login has to be updated.
+- **Outputs:** the username `admin` and the new password.
+
+### Delete Model Cache
+
+Removes one downloaded model file to reclaim disk.
+
+- **What it changes:** deletes the named file from the model cache. Path separators are stripped from the input, so it cannot reach outside that directory.
+- **Repeat safety:** idempotent; deleting a file that is not there succeeds.
+- **Not reversible**, but not destructive either — the model is re-downloaded if selected again.
+
+## Tasks
+
+Two tasks, both raised by a condition rather than at install, and both blocking.
+
+| Task            | Severity   | Raised when                   | Cleared when    |
+| --------------- | ---------- | ----------------------------- | --------------- |
+| Set UI Password | `critical` | Whenever no password is set   | The action runs |
+| Set Model       | `critical` | Whenever no model is selected | The action runs |
+
+Because they are conditional, clearing either value later raises its task again rather than leaving the service running unauthenticated or idle.
 
 ## Health Checks
 
-| Check         | Method                 | Grace period                            | Messages                                                                                                              |
-| ------------- | ---------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| llama.cpp API | Port listening on 8080 | 60 minutes (cold-cache model downloads) | "The llama.cpp API is ready" / "The llama.cpp API is not ready" or "No model selected. Run the \"Set Model\" action." |
+One check, on the daemon.
 
----
+| Check                     | Method                 | Grace Period |
+| ------------------------- | ---------------------- | ------------ |
+| `primary` "llama.cpp API" | Port 8080 is listening | 1 hour       |
+
+**The hour-long grace is for the model download**, which happens on the first start after a selection and is bounded only by size and bandwidth.
+
+With no model selected the daemon idles rather than exiting, and the check's failure message names the action to run — so an unconfigured install reports what to do rather than looking broken.
+
+## Backups and Restore
+
+The `main` volume is copied wholesale — `sdk.Backups.ofVolumes('main')`. No dump step and nothing excluded.
+
+**That means the model cache is in the backup**, which is very likely the largest thing on the server. A backup of this service is dominated by weights that could be re-downloaded instead; [Delete Model Cache](#actions) is the way to trim what gets captured.
+
+- **Included:** `store.json` with the model selection and password, and every downloaded model.
+- **Restore:** complete, and no tasks are raised — the selection and password come back, and the model is already cached, so the first start does not re-download.
 
 ## Limitations and Differences
 
-1. **One model per process.** llama-server holds a single GGUF in memory. To switch models, run **Set Model** again — the service restarts with the new weights.
-2. **Custom-action arg splitting.** The Custom variant's `Extra arguments` field is split on whitespace, so JSON values with quoted spaces will not survive — edit `store.json` directly for those.
-3. **Hardware-tier detection is best-effort.** GPU memory is read from `nvidia-smi` / `rocm-smi`; on Vulkan and unsupported topologies, the preset filter falls back to total system RAM as a memory budget.
-4. **Variants are independent installs.** Switching from e.g. `generic` to `nvidia` is an uninstall + reinstall, not an in-place change; cached models on the `main` volume can be restored from backup.
-
----
-
-## What Is Unchanged from Upstream
-
-- The full `llama-server` HTTP API and built-in chat UI.
-- All `llama-server` CLI flags — anything not consumed by the package wrapper passes straight through (via the Custom variant's extra args).
-- HuggingFace `-hf` model downloads and the `LLAMA_CACHE` layout.
-- GGUF model support, embedding endpoints, OpenAI-compatible response shapes, and tool-call formats.
-
----
-
-## Contributing
-
-Build and development workflow follow the StartOS packaging guide: <https://docs.start9.com/packaging>. Keep `README.md`, `instructions.md`, and `AGENTS.md` in sync with any change to user-visible behavior or package structure. See [UPDATING.md](UPDATING.md) for the upstream-bump procedure.
+1. **Two settings are required before the service does anything**, and each is enforced by a blocking task rather than defaulted.
+2. **Authentication is the reverse proxy's, not llama.cpp's.** Every client, including API clients, must send basic-auth credentials.
+3. **Which accelerator variant you get is decided by StartOS**, from the hardware present; it is not a setting.
+4. **Integrated AMD graphics fall back to the generic CPU build.** ROCm is matched only for discrete cards.
+5. **The Vulkan variant matches Intel GPUs only**, on the `i915` driver.
+6. **Model presets are filtered by detected memory**, and the fit estimate is approximate — a preset that is enabled can still be tight at large context sizes.
+7. **Extra server flags are split on whitespace**, so quoted arguments containing spaces do not survive.
+8. **Models are included in backups.** Expect the backup to be as large as the cache.
 
 ---
 
@@ -205,44 +199,33 @@ Build and development workflow follow the StartOS packaging guide: <https://docs
 
 ```yaml
 package_id: llama-cpp
-hardware_acceleration: true
-variants: # all publish under one version; StartOS matches by detected GPU driver
-  generic:
-    image: ghcr.io/ggml-org/llama.cpp:server
-    arch: [x86_64, aarch64]
-    accel: cpu
-    gpu_driver: null # universal CPU fallback
-  nvidia:
-    image: ghcr.io/ggml-org/llama.cpp:server-cuda
-    arch: [x86_64, aarch64]
-    accel: cuda
-    gpu_driver: nvidia # present only on -nvidia StartOS flavors; CPU fallback otherwise
-  rocm:
-    image: ghcr.io/ggml-org/llama.cpp:server-rocm
-    arch: [x86_64]
-    accel: rocm
-    gpu_driver: amdgpu # discrete AMD GPU only (integrated Radeon -> generic)
-  vulkan:
-    image: ghcr.io/ggml-org/llama.cpp:server-vulkan
-    arch: [x86_64, aarch64]
-    accel: vulkan
-    gpu_driver: i915 # Intel GPUs only
+image: ghcr.io/ggml-org/llama.cpp # server, server-cuda, server-rocm, or server-vulkan per variant
+architectures:
+  - x86_64
+  - aarch64 # not for the rocm variant
+subcontainers:
+  - llama-cpp-sub # the running daemon
+  - detect-nvidia # temporary; preset sizing
+  - detect-rocm # temporary; preset sizing
+  - detect-mem # temporary; preset sizing
+  - delete-cache # temporary; the Delete Model Cache action
 volumes:
   main: /data
-ports:
-  api_and_ui: 8080
-env:
-  LLAMA_CACHE: /data/models
-  HF_HOME: /data/huggingface
-dependencies: none
-auth: # llama-server runs keyless; basic auth enforced at the OS reverse proxy
-  type: basic
-  username: admin # hard-coded
-  password: generated by set-ui-password, stored as store.json uiPassword
-  internal_mesh: keyless # http://llama-cpp.startos:8080 bypasses the proxy gate
-startos_managed_args: ['--host 0.0.0.0', '--port 8080']
+file_models:
+  - store.json
+startos_managed_env_vars:
+  - LLAMA_CACHE
+  - HF_HOME
+dependencies: []
+interfaces:
+  api: { type: ui, port: 8080 } # basic auth enforced at the edge, username "admin"
 actions:
   - set-model
   - set-ui-password
   - delete-model-cache
+tasks:
+  - { action: set-ui-password, severity: critical }
+  - { action: set-model, severity: critical }
+health_checks:
+  - primary # displayed "llama.cpp API"; 1-hour grace covers the model download
 ```
