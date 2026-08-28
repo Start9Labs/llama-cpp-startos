@@ -1,73 +1,68 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '1.0.10630:0',
+  version: '1.0.10666:0',
   releaseNotes: {
-    en_US: `Updated llama.cpp to build b10630.
+    en_US: `Updated llama.cpp to build b10666.
 
-- **Action required if you pass \`--tools\` yourself.** The date-and-time tool moved out of the server into the chat UI. If you list tools explicitly in **Set Model**'s extra arguments (\`--tools ...\`), drop \`get_datetime\` from the list or the server will refuse to start.
-- A maintenance bump — 180 builds since b10450.
-- Adds support for the BailingMoE3 architecture, which runs the Ling 3.0 Flash models, for the Granite SWA and Granite MoE SWA architectures, and for multi-token prediction in GLM-4.5-Air. Speculative decoding gains DSpark draft models for LFM2 and BailingMoE3, and accepts speculators-format checkpoints.
-- Fixes a scheduler race that could produce wrong results when a model was split across more than one backend, along with correctness fixes for tensor-parallel splits and for DeepSeek V4 under concurrent requests.
-- Multimodal requests use less memory on the server, accept WebP images, gain a \`--mmproj-device\` flag to place the vision projector on a chosen device, resize images the way Pillow does for better accuracy, and load videos whose index sits at the end of the file.
-- Truncated or corrupted LoRA adapters are rejected with an error instead of loading silently with zero-padded weights, and grammar-constrained output falls back to an unconstrained string when a JSON schema uses a regular expression llama.cpp cannot express as a grammar.
-- Tool calling is more reliable: grammars built from hyphenated tool names — common with MCP toolsets — no longer fail to parse, tool calls in the last assistant message of a replayed conversation are no longer dropped, and the Qwen3-Coder workarounds that slowed down requests carrying many tools now apply only to Qwen3-Coder.
-- Faster inference on the CUDA and Vulkan builds.
-- The built-in chat UI gains browser-style conversation tabs with keyboard shortcuts, groups its built-in tools into Server and Browser, adds a tool that reports the runtime environment, and tidies up the settings navigation.
+A small maintenance bump — 36 builds since b10630, with no changes required to your setup.
 
-llama.cpp publishes one build per merged commit and does not provide a per-build changelog. Full commit range: https://github.com/ggml-org/llama.cpp/compare/b10450...b10630`,
-    es_ES: `Actualiza llama.cpp a la compilación b10630.
+- Adds support for the Qwen3.8-Flash-Next and nanbeige4.2-3B model architectures, and fixes conversion of Nemotron 3.5 Lightning models and of Nemotron-H LoRA adapters.
+- New \`--n-cpu-ffn\` server option keeps a chosen number of feed-forward layers on the CPU, which can make a model fit on a GPU that would otherwise run out of memory. Pass it through **Set Model** → *Custom* → extra arguments.
+- New \`--kv-unified-per-slot\` server option gives each request slot its own context, so concurrent chats no longer share one KV cache budget.
+- Faster and broader hardware coverage: the Vulkan build gains DeepSeek V4 lightning-indexer support and cross-entropy operations, and the CUDA build re-enables MoE matrix kernels on older sm_60 cards.
+- Loading a model reads its tensors lazily, and quantizing one now caps its working memory instead of pulling whole large tensors into RAM.
+- The built-in chat UI opens Settings and MCP Servers as dialogs, replaces per-conversation MCP overrides with a per-conversation tool policy, and reworks the model selector and attachment panel.
 
-- **Requiere acción si usted mismo pasa \`--tools\`.** La herramienta de fecha y hora se ha trasladado del servidor a la interfaz de chat. Si enumera herramientas explícitamente en los argumentos adicionales de **Establecer modelo** (\`--tools ...\`), quite \`get_datetime\` de la lista o el servidor no arrancará.
-- Una actualización de mantenimiento: 180 compilaciones desde la b10450.
-- Añade compatibilidad con la arquitectura BailingMoE3, que permite ejecutar los modelos Ling 3.0 Flash, con las arquitecturas Granite SWA y Granite MoE SWA, y con la predicción de varios tokens en GLM-4.5-Air. La decodificación especulativa incorpora modelos borrador DSpark para LFM2 y BailingMoE3, y admite puntos de control en formato speculators.
-- Corrige una condición de carrera en el planificador que podía dar resultados incorrectos cuando un modelo se repartía entre más de un backend, junto con correcciones para el reparto en paralelismo de tensores y para DeepSeek V4 con varias peticiones simultáneas.
-- Las peticiones multimodales consumen menos memoria en el servidor, aceptan imágenes WebP, incorporan la opción \`--mmproj-device\` para situar el proyector de visión en un dispositivo concreto, redimensionan las imágenes igual que Pillow para mayor precisión y cargan vídeos cuyo índice está al final del archivo.
-- Los adaptadores LoRA truncados o dañados se rechazan con un error en lugar de cargarse en silencio con pesos rellenados de ceros, y la salida restringida por gramática recurre a una cadena sin restricciones cuando un esquema JSON usa una expresión regular que llama.cpp no puede expresar como gramática.
-- La llamada a herramientas es más fiable: las gramáticas construidas a partir de nombres de herramientas con guiones —habituales en los conjuntos de herramientas MCP— ya no fallan al analizarse, las llamadas a herramientas del último mensaje del asistente en una conversación reproducida ya no se descartan, y las soluciones alternativas para Qwen3-Coder que ralentizaban las peticiones con muchas herramientas ahora se aplican solo a Qwen3-Coder.
-- Inferencia más rápida en las compilaciones CUDA y Vulkan.
-- La interfaz de chat integrada incorpora pestañas de conversación al estilo del navegador con atajos de teclado, agrupa sus herramientas integradas en Servidor y Navegador, añade una herramienta que informa del entorno de ejecución y reorganiza la navegación de los ajustes.
+llama.cpp publishes one build per merged commit and does not provide a per-build changelog. Full commit range: https://github.com/ggml-org/llama.cpp/compare/b10630...b10666`,
+    es_ES: `Actualiza llama.cpp a la compilación b10666.
 
-llama.cpp publica una compilación por cada commit fusionado y no ofrece un registro de cambios por compilación. Rango completo de commits: https://github.com/ggml-org/llama.cpp/compare/b10450...b10630`,
-    de_DE: `Aktualisiert llama.cpp auf Build b10630.
+Una pequeña actualización de mantenimiento: 36 compilaciones desde la b10630, sin cambios necesarios en su configuración.
 
-- **Handlungsbedarf, wenn Sie \`--tools\` selbst übergeben.** Das Werkzeug für Datum und Uhrzeit ist vom Server in die Chat-Oberfläche umgezogen. Wenn Sie in den zusätzlichen Argumenten von **Modell festlegen** Werkzeuge ausdrücklich auflisten (\`--tools ...\`), entfernen Sie \`get_datetime\` aus der Liste, sonst startet der Server nicht.
-- Ein Wartungsupdate – 180 Builds seit b10450.
-- Ergänzt Unterstützung für die Architektur BailingMoE3, mit der sich die Modelle Ling 3.0 Flash ausführen lassen, für die Architekturen Granite SWA und Granite MoE SWA sowie für die Mehrtoken-Vorhersage in GLM-4.5-Air. Die spekulative Dekodierung erhält DSpark-Entwurfsmodelle für LFM2 und BailingMoE3 und akzeptiert Prüfpunkte im speculators-Format.
-- Behebt ein Wettlaufproblem im Planer, das zu falschen Ergebnissen führen konnte, wenn ein Modell auf mehr als ein Backend verteilt wurde, sowie Fehler bei der Aufteilung mit Tensor-Parallelität und bei DeepSeek V4 unter gleichzeitigen Anfragen.
-- Multimodale Anfragen benötigen auf dem Server weniger Speicher, akzeptieren WebP-Bilder, erhalten die Option \`--mmproj-device\`, um den Vision-Projektor auf einem bestimmten Gerät auszuführen, skalieren Bilder wie Pillow für höhere Genauigkeit und laden Videos, deren Index am Ende der Datei steht.
-- Abgeschnittene oder beschädigte LoRA-Adapter werden mit einem Fehler abgelehnt, statt still mit nullgefüllten Gewichten geladen zu werden, und grammatikgebundene Ausgaben weichen auf eine unbeschränkte Zeichenkette aus, wenn ein JSON-Schema einen regulären Ausdruck enthält, den llama.cpp nicht als Grammatik ausdrücken kann.
-- Werkzeugaufrufe sind zuverlässiger: Grammatiken, die aus Werkzeugnamen mit Bindestrich gebildet werden – in MCP-Werkzeugsammlungen üblich –, lassen sich wieder auswerten, Werkzeugaufrufe in der letzten Assistenznachricht einer wiedergegebenen Unterhaltung gehen nicht mehr verloren, und die Qwen3-Coder-Behelfslösungen, die Anfragen mit vielen Werkzeugen verlangsamt haben, gelten jetzt nur noch für Qwen3-Coder.
-- Schnellere Inferenz in den CUDA- und Vulkan-Builds.
-- Die integrierte Chat-Oberfläche erhält Konversations-Tabs im Browser-Stil mit Tastenkürzeln, gruppiert ihre eingebauten Werkzeuge in Server und Browser, ergänzt ein Werkzeug, das die Laufzeitumgebung meldet, und räumt die Einstellungsnavigation auf.
+- Añade compatibilidad con las arquitecturas de modelo Qwen3.8-Flash-Next y nanbeige4.2-3B, y corrige la conversión de los modelos Nemotron 3.5 Lightning y de los adaptadores LoRA de Nemotron-H.
+- La nueva opción de servidor \`--n-cpu-ffn\` mantiene en la CPU el número de capas «feed-forward» que usted indique, lo que puede permitir que un modelo quepa en una GPU que de otro modo se quedaría sin memoria. Puede indicarla en **Establecer modelo** → *Personalizado* → argumentos adicionales.
+- La nueva opción de servidor \`--kv-unified-per-slot\` da a cada ranura de petición su propio contexto, de modo que las conversaciones simultáneas ya no comparten un único presupuesto de caché KV.
+- Mayor cobertura de hardware y más velocidad: la compilación Vulkan incorpora la compatibilidad con el «lightning indexer» de DeepSeek V4 y las operaciones de entropía cruzada, y la compilación CUDA vuelve a habilitar los núcleos matriciales MoE en las tarjetas sm_60 más antiguas.
+- La carga de un modelo lee sus tensores de forma diferida, y la cuantización limita ahora su memoria de trabajo en lugar de cargar tensores grandes enteros en la RAM.
+- La interfaz de chat integrada abre Ajustes y Servidores MCP como diálogos, sustituye las anulaciones de MCP por conversación por una política de herramientas por conversación y rediseña el selector de modelos y el panel de adjuntos.
 
-llama.cpp veröffentlicht einen Build pro zusammengeführtem Commit und stellt kein Änderungsprotokoll je Build bereit. Vollständiger Commit-Bereich: https://github.com/ggml-org/llama.cpp/compare/b10450...b10630`,
-    pl_PL: `Aktualizuje llama.cpp do kompilacji b10630.
+llama.cpp publica una compilación por cada commit fusionado y no ofrece un registro de cambios por compilación. Rango completo de commits: https://github.com/ggml-org/llama.cpp/compare/b10630...b10666`,
+    de_DE: `Aktualisiert llama.cpp auf Build b10666.
 
-- **Wymagane działanie, jeśli sam przekazujesz \`--tools\`.** Narzędzie daty i godziny zostało przeniesione z serwera do interfejsu czatu. Jeśli wymieniasz narzędzia jawnie w dodatkowych argumentach akcji **Ustaw model** (\`--tools ...\`), usuń \`get_datetime\` z listy, inaczej serwer się nie uruchomi.
-- Aktualizacja konserwacyjna — 180 kompilacji od b10450.
-- Dodaje obsługę architektury BailingMoE3, która pozwala uruchamiać modele Ling 3.0 Flash, architektur Granite SWA i Granite MoE SWA oraz przewidywania wielu tokenów w GLM-4.5-Air. Dekodowanie spekulatywne zyskuje modele robocze DSpark dla LFM2 i BailingMoE3 oraz przyjmuje punkty kontrolne w formacie speculators.
-- Naprawia sytuację wyścigu w harmonogramie, która mogła dawać błędne wyniki, gdy model był rozdzielony na więcej niż jeden backend, a także błędy w podziale przy równoległości tensorów i w DeepSeek V4 przy jednoczesnych żądaniach.
-- Żądania multimodalne zużywają mniej pamięci na serwerze, przyjmują obrazy WebP, zyskują opcję \`--mmproj-device\` pozwalającą umieścić projektor wizyjny na wybranym urządzeniu, skalują obrazy tak jak Pillow dla większej dokładności i wczytują filmy, których indeks znajduje się na końcu pliku.
-- Obcięte lub uszkodzone adaptery LoRA są odrzucane z błędem, zamiast być po cichu wczytywane z wagami uzupełnionymi zerami, a wyjście ograniczone gramatyką korzysta z nieograniczonego ciągu znaków, gdy schemat JSON zawiera wyrażenie regularne, którego llama.cpp nie potrafi wyrazić jako gramatyki.
-- Wywoływanie narzędzi działa pewniej: gramatyki tworzone z nazw narzędzi zawierających łącznik — częstych w zestawach narzędzi MCP — znów dają się przetworzyć, wywołania narzędzi w ostatniej wiadomości asystenta w odtwarzanej rozmowie nie są już pomijane, a obejścia dla Qwen3-Coder, które spowalniały żądania z wieloma narzędziami, dotyczą teraz wyłącznie Qwen3-Coder.
-- Szybsze wnioskowanie w kompilacjach CUDA i Vulkan.
-- Wbudowany interfejs czatu zyskuje karty rozmów w stylu przeglądarki wraz ze skrótami klawiszowymi, grupuje wbudowane narzędzia w kategorie Serwer i Przeglądarka, dodaje narzędzie zgłaszające środowisko uruchomieniowe i porządkuje nawigację w ustawieniach.
+Ein kleines Wartungsupdate – 36 Builds seit b10630, ohne Änderungsbedarf an Ihrer Einrichtung.
 
-llama.cpp publikuje jedną kompilację na scalony commit i nie udostępnia listy zmian dla poszczególnych kompilacji. Pełny zakres commitów: https://github.com/ggml-org/llama.cpp/compare/b10450...b10630`,
-    fr_FR: `Met à jour llama.cpp vers la version b10630.
+- Ergänzt Unterstützung für die Modellarchitekturen Qwen3.8-Flash-Next und nanbeige4.2-3B und behebt die Konvertierung von Nemotron-3.5-Lightning-Modellen sowie von Nemotron-H-LoRA-Adaptern.
+- Die neue Serveroption \`--n-cpu-ffn\` belässt eine wählbare Anzahl Feed-Forward-Schichten auf der CPU, wodurch ein Modell auf eine GPU passen kann, deren Speicher sonst nicht reicht. Übergeben Sie sie unter **Modell festlegen** → *Benutzerdefiniert* → zusätzliche Argumente.
+- Die neue Serveroption \`--kv-unified-per-slot\` gibt jedem Anfrage-Slot einen eigenen Kontext, sodass gleichzeitige Unterhaltungen nicht mehr ein gemeinsames KV-Cache-Budget teilen.
+- Schnellere und breitere Hardware-Unterstützung: Der Vulkan-Build erhält Unterstützung für den Lightning-Indexer von DeepSeek V4 sowie Kreuzentropie-Operationen, und der CUDA-Build aktiviert die MoE-Matrixkerne auf älteren sm_60-Karten wieder.
+- Beim Laden eines Modells werden dessen Tensoren verzögert gelesen, und beim Quantisieren wird der Arbeitsspeicher begrenzt, statt ganze große Tensoren in den RAM zu holen.
+- Die integrierte Chat-Oberfläche öffnet Einstellungen und MCP-Server als Dialoge, ersetzt die MCP-Übersteuerungen je Unterhaltung durch eine Werkzeugrichtlinie je Unterhaltung und überarbeitet die Modellauswahl und den Anhangbereich.
 
-- **Action requise si vous passez \`--tools\` vous-même.** L'outil de date et d'heure a été déplacé du serveur vers l'interface de discussion. Si vous listez explicitement des outils dans les arguments supplémentaires de **Définir le modèle** (\`--tools ...\`), retirez \`get_datetime\` de la liste, sinon le serveur ne démarrera pas.
-- Une mise à jour de maintenance — 180 versions depuis la b10450.
-- Ajoute la prise en charge de l'architecture BailingMoE3, qui permet d'exécuter les modèles Ling 3.0 Flash, des architectures Granite SWA et Granite MoE SWA, et de la prédiction multi-jetons dans GLM-4.5-Air. Le décodage spéculatif gagne les modèles brouillons DSpark pour LFM2 et BailingMoE3, et accepte les points de contrôle au format speculators.
-- Corrige une situation de compétition dans l'ordonnanceur qui pouvait produire des résultats erronés lorsqu'un modèle était réparti sur plus d'un backend, ainsi que des erreurs de répartition en parallélisme de tenseurs et dans DeepSeek V4 en cas de requêtes simultanées.
-- Les requêtes multimodales consomment moins de mémoire côté serveur, acceptent les images WebP, gagnent l'option \`--mmproj-device\` pour placer le projecteur visuel sur l'appareil choisi, redimensionnent les images comme le fait Pillow pour plus de précision et chargent les vidéos dont l'index se trouve à la fin du fichier.
-- Les adaptateurs LoRA tronqués ou corrompus sont rejetés avec une erreur au lieu d'être chargés silencieusement avec des poids complétés par des zéros, et la sortie contrainte par grammaire bascule sur une chaîne non contrainte lorsqu'un schéma JSON utilise une expression régulière que llama.cpp ne sait pas exprimer sous forme de grammaire.
-- L'appel d'outils est plus fiable : les grammaires construites à partir de noms d'outils comportant un trait d'union — courants dans les ensembles d'outils MCP — s'analysent de nouveau, les appels d'outils du dernier message de l'assistant d'une conversation rejouée ne sont plus perdus, et les contournements propres à Qwen3-Coder qui ralentissaient les requêtes comportant de nombreux outils ne s'appliquent plus qu'à Qwen3-Coder.
-- Inférence plus rapide sur les versions CUDA et Vulkan.
-- L'interface de discussion intégrée gagne des onglets de conversation façon navigateur avec raccourcis clavier, regroupe ses outils intégrés en Serveur et Navigateur, ajoute un outil qui indique l'environnement d'exécution et réorganise la navigation des paramètres.
+llama.cpp veröffentlicht einen Build pro zusammengeführtem Commit und stellt kein Änderungsprotokoll je Build bereit. Vollständiger Commit-Bereich: https://github.com/ggml-org/llama.cpp/compare/b10630...b10666`,
+    pl_PL: `Aktualizuje llama.cpp do kompilacji b10666.
 
-llama.cpp publie une version par commit fusionné et ne fournit pas de journal des modifications par version. Plage complète des commits : https://github.com/ggml-org/llama.cpp/compare/b10450...b10630`,
+Niewielka aktualizacja konserwacyjna — 36 kompilacji od b10630, bez potrzeby zmian w konfiguracji.
+
+- Dodaje obsługę architektur modeli Qwen3.8-Flash-Next i nanbeige4.2-3B oraz naprawia konwersję modeli Nemotron 3.5 Lightning i adapterów LoRA dla Nemotron-H.
+- Nowa opcja serwera \`--n-cpu-ffn\` pozostawia wybraną liczbę warstw feed-forward na procesorze, dzięki czemu model może zmieścić się na karcie graficznej, której pamięć w innym razie by nie wystarczyła. Podasz ją w akcji **Ustaw model** → *Własny* → dodatkowe argumenty.
+- Nowa opcja serwera \`--kv-unified-per-slot\` przydziela każdemu gniazdu żądania własny kontekst, więc równoczesne rozmowy nie dzielą już jednego budżetu pamięci podręcznej KV.
+- Szybsza i szersza obsługa sprzętu: kompilacja Vulkan zyskuje obsługę indeksera lightning z DeepSeek V4 oraz operacje entropii krzyżowej, a kompilacja CUDA ponownie włącza macierzowe jądra MoE na starszych kartach sm_60.
+- Wczytywanie modelu odczytuje jego tensory leniwie, a kwantyzacja ogranicza teraz pamięć roboczą, zamiast wczytywać całe duże tensory do pamięci RAM.
+- Wbudowany interfejs czatu otwiera Ustawienia i Serwery MCP jako okna dialogowe, zastępuje nadpisania MCP dla poszczególnych rozmów polityką narzędzi dla rozmowy oraz przebudowuje wybór modelu i panel załączników.
+
+llama.cpp publikuje jedną kompilację na scalony commit i nie udostępnia listy zmian dla poszczególnych kompilacji. Pełny zakres commitów: https://github.com/ggml-org/llama.cpp/compare/b10630...b10666`,
+    fr_FR: `Met à jour llama.cpp vers la version b10666.
+
+Une petite mise à jour de maintenance — 36 versions depuis la b10630, sans changement à apporter à votre installation.
+
+- Ajoute la prise en charge des architectures de modèle Qwen3.8-Flash-Next et nanbeige4.2-3B, et corrige la conversion des modèles Nemotron 3.5 Lightning ainsi que des adaptateurs LoRA Nemotron-H.
+- La nouvelle option serveur \`--n-cpu-ffn\` conserve sur le processeur le nombre de couches « feed-forward » que vous indiquez, ce qui peut permettre à un modèle de tenir sur une carte graphique dont la mémoire serait autrement insuffisante. Indiquez-la dans **Définir le modèle** → *Personnalisé* → arguments supplémentaires.
+- La nouvelle option serveur \`--kv-unified-per-slot\` donne à chaque emplacement de requête son propre contexte, si bien que les conversations simultanées ne partagent plus un seul budget de cache KV.
+- Prise en charge matérielle plus large et plus rapide : la version Vulkan gagne la prise en charge de l'indexeur « lightning » de DeepSeek V4 et des opérations d'entropie croisée, et la version CUDA réactive les noyaux matriciels MoE sur les cartes sm_60 plus anciennes.
+- Le chargement d'un modèle lit ses tenseurs de façon paresseuse, et la quantification plafonne désormais sa mémoire de travail au lieu de charger de gros tenseurs entiers en RAM.
+- L'interface de discussion intégrée ouvre les Paramètres et les Serveurs MCP sous forme de boîtes de dialogue, remplace les surcharges MCP par conversation par une politique d'outils par conversation, et retravaille le sélecteur de modèles et le panneau de pièces jointes.
+
+llama.cpp publie une version par commit fusionné et ne fournit pas de journal des modifications par version. Plage complète des commits : https://github.com/ggml-org/llama.cpp/compare/b10630...b10666`,
   },
   migrations: {
     up: async ({ effects }) => {},
