@@ -18,7 +18,7 @@ Two tasks appear on the dashboard on a fresh install:
 1. **Set UI Password** — generates your web UI login password. The username is always `admin`; copy the password it returns (you'll need it the first time you open the UI or connect a client). Run it again any time to rotate the password.
 2. **Set Model** — choose what llama.cpp serves. The form shows curated presets and disables ones too large for the detected memory. If none of the presets fit, pick **Custom** and paste a HuggingFace repo such as `unsloth/Qwen2.5-7B-Instruct-GGUF:Q4_K_M`. On a GPU variant, leave `GPU layers` at 999 to offload everything; on the CPU-only `generic` variant the field is ignored.
 
-The service starts as soon as a model is selected. The first launch downloads weights — expect several gigabytes and a few minutes (or longer over a slow link) before the API answers. Subsequent restarts are fast.
+Complete both tasks, then start the service from the dashboard. The first launch downloads weights — expect several gigabytes and a few minutes (or longer over a slow link) before the API answers. Subsequent restarts are fast.
 
 ## Using llama.cpp
 
