@@ -109,12 +109,12 @@ An OpenAI-compatible client therefore needs those basic-auth credentials as well
 
 ## Installation and First-Run Flow
 
-Install writes nothing and the service starts idle: **two `critical` tasks** stand between a fresh install and a working one, and both must be cleared.
+Install writes nothing and leaves the service stopped. **Two `critical` tasks** must be cleared before it can run.
 
 1. **Set UI Password** — until then there is no credential in front of the API.
-2. **Set Model** — until then there is nothing to serve. The daemon runs but does no work, and its health check says so by name.
+2. **Set Model** — until then there is nothing to serve.
 
-Both are raised by a condition rather than at install time, so they reappear if either value is later cleared.
+Both are raised by a condition rather than at install time, so they reappear if either value is later cleared. After completing both tasks, start the service from the dashboard.
 
 The first start after choosing a model **downloads it**, which is why the health check allows an hour before reporting failure. A large model on a slow connection can take most of that.
 
