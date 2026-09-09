@@ -175,12 +175,11 @@ With no model selected the daemon idles rather than exiting, and the check's fai
 
 ## Backups and Restore
 
-The `main` volume is copied wholesale — `sdk.Backups.ofVolumes('main')`. No dump step and nothing excluded.
+The `main` volume is backed up — `sdk.Backups.ofVolumes('main')` — with one exclusion: `setOptions({ exclude: ['models/'] })` leaves out `/data/models`, the model cache. No dump step.
 
-**That means the model cache is in the backup**, which is very likely the largest thing on the server. A backup of this service is dominated by weights that could be re-downloaded instead; [Delete Model Cache](#actions) is the way to trim what gets captured.
-
-- **Included:** `store.json` with the model selection and password, and every downloaded model.
-- **Restore:** complete, and no tasks are raised — the selection and password come back, and the model is already cached, so the first start does not re-download.
+- **Included:** `store.json` with the model selection and password.
+- **Excluded:** every downloaded model. Weights are re-downloadable from upstream, so the backup stays small rather than being dominated by the cache.
+- **Restore:** the selection and password come back and no tasks are raised. The selected model is downloaded again on the first start, inside the health check's one-hour grace.
 
 ## Limitations and Differences
 
@@ -191,7 +190,7 @@ The `main` volume is copied wholesale — `sdk.Backups.ofVolumes('main')`. No du
 5. **The Vulkan variant matches Intel GPUs only**, on the `i915` driver.
 6. **Model presets are filtered by detected memory**, and the fit estimate is approximate — a preset that is enabled can still be tight at large context sizes.
 7. **Extra server flags are split on whitespace**, so quoted arguments containing spaces do not survive.
-8. **Models are included in backups.** Expect the backup to be as large as the cache.
+8. **Models are excluded from backups.** After a restore, the selected model downloads again on first start.
 
 ---
 

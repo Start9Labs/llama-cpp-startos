@@ -11,7 +11,7 @@
 - The upstream chat UI at the same URL — open the interface in a browser to chat without setting up a client.
 - A password-protected login (username `admin`) on the UI and API, so only you can use them. Other StartOS AI apps that depend on llama.cpp (such as Open WebUI) connect over the internal network with no login to copy.
 - Curated GGUF presets, plus a Custom option that accepts any HuggingFace GGUF repo.
-- Persistent model cache on the package volume — downloads happen once and survive restarts and backups.
+- Persistent model cache on the package volume — downloads happen once and survive restarts. The cache is excluded from backups; after a restore, the selected model downloads again on first start.
 
 Two tasks appear on the dashboard on a fresh install:
 
