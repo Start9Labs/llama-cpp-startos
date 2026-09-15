@@ -23,7 +23,7 @@ All four variants are cut from the same upstream commit and bump together.
 Ask GHCR what it has actually published, rather than asking GitHub what was released. This lists any `server-bNNNN` tags newer than the build currently pinned in `startos/manifest/index.ts` (`server-b` tags sort lexically the same as numerically while build numbers keep their digit count):
 
 ```sh
-CURRENT=b9982   # ← the `upstreamBuild` currently in startos/manifest/index.ts
+CURRENT=b10975  # ← the `upstreamBuild` currently in startos/manifest/index.ts
 TOKEN=$(curl -s "https://ghcr.io/token?scope=repository:ggml-org/llama.cpp:pull" | jq -r .token)
 curl -s -H "Authorization: Bearer $TOKEN" \
   "https://ghcr.io/v2/ggml-org/llama.cpp/tags/list?n=1000&last=server-${CURRENT}" \
