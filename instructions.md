@@ -46,7 +46,7 @@ curl -s -u admin:<your-ui-password> <your-interface-url>/v1/chat/completions \
 
 - **Set Model** — switch to a different preset or custom GGUF. The form opens with your current selection already filled in, so you can change one setting without re-entering the rest. The service restarts with the new weights; uncached models download on this restart.
 - **Set UI Password** — generate a new web UI password (username stays `admin`). Use it for first-time setup or to rotate the password later.
-- **Delete Model Cache** — remove a specific filename from the cache (e.g. `Qwen2.5-7B-Instruct-Q4_K_M.gguf`) to reclaim disk space. A deleted model will be re-downloaded if you select it again.
+- **Delete Model Cache** — pick a downloaded model from the list, with its size, and remove it to reclaim disk space. The model you are currently running can't be deleted; switch to another one with Set Model first. A deleted model will be re-downloaded if you select it again.
 
 ## Limitations
 

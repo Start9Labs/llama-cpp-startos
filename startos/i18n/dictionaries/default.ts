@@ -43,9 +43,14 @@ const dict = {
   // actions/deleteModelCache.ts
   'Delete Model Cache': 31,
   'Remove a downloaded GGUF model from the cache to free up disk space': 32,
-  'Cached file': 33,
-  'Filename inside `/data/models` to delete (e.g. `Qwen2.5-7B-Instruct-Q4_K_M.gguf`).': 34,
-  'This will permanently delete the cached file. The model will be re-downloaded if selected again.': 35,
+  'Cached model': 33,
+  'Every downloaded file of the selected HuggingFace repo is removed. The model currently in use cannot be deleted; switch to another model first.': 34,
+  'This will permanently delete the cached model. It will be re-downloaded if selected again.': 35,
+  'The model cache is empty.': 41,
+  'That model is no longer in the cache.': 42,
+  'This model is currently in use. Switch to another model with "Set Model" first.': 43,
+  'Model Deleted': 44,
+  'Removed ${model}, freeing ${size}.': 45,
 
   // actions/setUiPassword.ts
   'Set UI Password': 36,

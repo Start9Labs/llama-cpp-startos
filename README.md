@@ -52,7 +52,6 @@ The AMD requirement matches discrete cards by product name rather than excluding
 | -------------------------------------------- | ------------------------------------------------ |
 | `llama-cpp-sub`                              | The `primary` daemon, and the one to `attach` to |
 | `detect-nvidia`, `detect-rocm`, `detect-mem` | Temporary; used to size the model presets        |
-| `delete-cache`                               | Temporary; the Delete Model Cache action         |
 
 ## Volume and Data Layout
 
@@ -63,6 +62,8 @@ One volume, and most of it is downloaded models.
 | `main` | `/data`     | `store.json`, the GGUF model cache under `models/`, and HuggingFace's own cache |
 
 Models are the bulk of it — a single quantized model runs from roughly one to forty gigabytes depending on size.
+
+llama.cpp keeps the cache in the HuggingFace hub layout: each repo is `models/models--<org>--<repo>/`, with the weights in `blobs/` and `snapshots/<commit>/<file>.gguf` as symlinks into them. Deleting a file under `snapshots/` frees nothing; a model's space is reclaimed by removing its whole repo folder.
 
 ## File Models
 
@@ -144,10 +145,12 @@ Generates the password for the API and chat UI.
 
 ### Delete Model Cache
 
-Removes one downloaded model file to reclaim disk.
+Removes one downloaded model to reclaim disk.
 
-- **What it changes:** deletes the named file from the model cache. Path separators are stripped from the input, so it cannot reach outside that directory.
-- **Repeat safety:** idempotent; deleting a file that is not there succeeds.
+- **What it changes:** deletes the chosen `models--<org>--<repo>` folder from `/data/models` — every quantization downloaded from that repo goes with it. The form lists the cached repos with their size on disk, plus any loose `*.gguf` files left by older builds; it never takes a free-form path.
+- **Models in use cannot be deleted.** The main and speculative draft repos configured in `serveArgs` are disabled in the form and refused if submitted. Repeated HuggingFace options use the last value, matching llama-server. llama-server holds these models open, so the space would not come back until a restart, and the restart would download them again. Switch models with Set Model first.
+- **Repeat safety:** fails with an error if the chosen model is no longer in the cache, rather than reporting success.
+- **Outputs:** the repo removed and the space freed.
 - **Not reversible**, but not destructive either — the model is re-downloaded if selected again.
 
 ## Tasks
@@ -207,7 +210,6 @@ subcontainers:
   - detect-nvidia # temporary; preset sizing
   - detect-rocm # temporary; preset sizing
   - detect-mem # temporary; preset sizing
-  - delete-cache # temporary; the Delete Model Cache action
 volumes:
   main: /data
 file_models:
