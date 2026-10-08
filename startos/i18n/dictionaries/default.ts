@@ -31,6 +31,7 @@ const dict = {
   "Presets too large for this server's memory are disabled.": 46,
   'needs about ${memory} GB of memory': 47,
   'any HuggingFace GGUF model, with your own context size, GPU layers and server flags': 48,
+  'That downloaded model is no longer in the cache.': 53,
 
   // model preset labels
   'Llama 3.2 1B Instruct': 22,

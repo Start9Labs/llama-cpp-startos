@@ -132,6 +132,7 @@ Chooses what the server runs — either a curated preset or a model of your own.
 - **Repeat safety:** safe to re-run. Switching back to a previously used model is fast, because the old one is still cached.
 - **The form reopens on your current selection**, read back from `modelSelection`, so changing one setting does not mean re-entering the rest. With nothing chosen yet it falls back to the hardware-filtered default.
 - **Presets are filtered to your hardware.** The form reads the accelerator's memory — VRAM on NVIDIA and ROCm, system memory otherwise — and disables any preset that would not fit, defaulting to the smallest that does. The field's help text lists every preset with the memory it needs. The estimate is the quantized weights plus roughly a quarter for the context cache.
+- **Models already downloaded to the volume appear in the same list**, so a model you fetched before can be reselected without retyping its repo or re-downloading it. A downloaded file that is a preset's quant stays under that preset, while other quants of the same repo get their own entries. A downloaded entry is passed to `llama-server` as `-hf <org>/<repo> -hff <file>` so the exact cached quant is reused. Those entries run at a fixed 8192-token context with full GPU offload; use Custom for anything else.
 - **Custom** takes a HuggingFace GGUF repo, optionally a specific file, a context size, a GPU-layer count, and extra server flags. Those extra flags are split on whitespace, so a quoted value with spaces will not survive.
 
 ### Set UI Password
@@ -194,6 +195,7 @@ The `main` volume is backed up — `sdk.Backups.ofVolumes('main')` — with one 
 6. **Model presets are filtered by detected memory**, and the fit estimate is approximate — a preset that is enabled can still be tight at large context sizes.
 7. **Extra server flags are split on whitespace**, so quoted arguments containing spaces do not survive.
 8. **Models are excluded from backups.** After a restore, the selected model downloads again on first start.
+9. **Downloaded models are listed by repo and file.** A cached file matching a curated preset's quant is not duplicated; other quants from the same repo remain separate entries. Downloaded entries do not expose context or GPU-layer settings — use Custom for those.
 
 ---
 

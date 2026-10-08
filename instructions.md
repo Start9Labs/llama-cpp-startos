@@ -16,7 +16,7 @@
 Two tasks appear on the dashboard on a fresh install:
 
 1. **Set UI Password** — generates your web UI login password. The username is always `admin`; copy the password it returns (you'll need it the first time you open the UI or connect a client). Run it again any time to rotate the password.
-2. **Set Model** — choose what llama.cpp serves. The form shows curated presets, lists the memory each one needs, and disables ones too large for the detected memory. If none of the presets fit, pick **Custom** and paste a HuggingFace repo such as `unsloth/Qwen2.5-7B-Instruct-GGUF:Q4_K_M`. On a GPU variant, leave `GPU layers` at 999 to offload everything; on the CPU-only `generic` variant the field is ignored.
+2. **Set Model** — choose what llama.cpp serves. The form shows curated presets, lists the memory each one needs, and disables ones too large for the detected memory. Models you have already downloaded are listed too, so you can switch back to one without re-entering or re-downloading it. If none of the presets fit, pick **Custom** and paste a HuggingFace repo such as `unsloth/Qwen2.5-7B-Instruct-GGUF:Q4_K_M`. On a GPU variant, leave `GPU layers` at 999 to offload everything; on the CPU-only `generic` variant the field is ignored.
 
 Complete both tasks, then start the service from the dashboard. The first launch downloads weights — expect several gigabytes and a few minutes (or longer over a slow link) before the API answers. Subsequent restarts are fast.
 
@@ -44,7 +44,7 @@ curl -s -u admin:<your-ui-password> <your-interface-url>/v1/chat/completions \
 
 ### Actions
 
-- **Set Model** — switch to a different preset or custom GGUF. The form opens with your current selection already filled in, so you can change one setting without re-entering the rest. The service restarts with the new weights; uncached models download on this restart.
+- **Set Model** — switch to a different preset, a model you already downloaded, or a custom GGUF. The form opens with your current selection already filled in, so you can change one setting without re-entering the rest. The service restarts with the new weights; uncached models download on this restart.
 - **Set UI Password** — generate a new web UI password (username stays `admin`). Use it for first-time setup or to rotate the password later; when rotating, it asks you to confirm, since saved logins stop working.
 - **Delete Model Cache** — pick a downloaded model from the list, with its size, and remove it to reclaim disk space. The model you are currently running can't be deleted; switch to another one with Set Model first. A deleted model will be re-downloaded if you select it again.
 
@@ -52,3 +52,4 @@ curl -s -u admin:<your-ui-password> <your-interface-url>/v1/chat/completions \
 
 - **One model at a time.** Switching models restarts the service.
 - **Models are large.** A 70B Q4 file is ~40 GB; even small models are several gigabytes. Confirm free disk before selecting a preset.
+- **Already-downloaded models are added to the list with fixed settings.** They run at an 8192-token context with full GPU offload; pick **Custom** if you need a different context size or extra flags.

@@ -55,6 +55,7 @@ export default {
     50: 'Use estas credenciales para iniciar sesión en la interfaz web de llama.cpp desde su navegador.',
     51: 'Nombre de usuario',
     52: 'Contraseña',
+    53: 'Ese modelo descargado ya no está en la caché.',
   },
   de_DE: {
     0: 'Starte llama.cpp!',
@@ -110,6 +111,7 @@ export default {
     50: 'Verwenden Sie diese Zugangsdaten, um sich im Browser in der llama.cpp-Weboberfläche anzumelden.',
     51: 'Benutzername',
     52: 'Passwort',
+    53: 'Dieses heruntergeladene Modell ist nicht mehr im Cache.',
   },
   pl_PL: {
     0: 'Uruchamianie llama.cpp!',
@@ -165,6 +167,7 @@ export default {
     50: 'Użyj tych danych, aby zalogować się w przeglądarce do interfejsu webowego llama.cpp.',
     51: 'Nazwa użytkownika',
     52: 'Hasło',
+    53: 'Tego pobranego modelu nie ma już w pamięci podręcznej.',
   },
   fr_FR: {
     0: 'Démarrage de llama.cpp !',
@@ -220,5 +223,6 @@ export default {
     50: 'Utilisez ces identifiants pour vous connecter à l’interface web de llama.cpp dans votre navigateur.',
     51: 'Nom d’utilisateur',
     52: 'Mot de passe',
+    53: 'Ce modèle téléchargé n’est plus dans le cache.',
   },
 } satisfies Record<string, LangDict>
