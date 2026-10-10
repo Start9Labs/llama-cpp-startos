@@ -35,7 +35,7 @@
 
 ## Image and Container Runtime
 
-The upstream image is used unmodified, but **the package is built four times** — one variant per accelerator — and StartOS installs whichever matches your hardware.
+The upstream image is used unmodified, but **the package is built four times** — one variant per accelerator — and StartOS installs whichever matches your hardware. Images are pinned to the upstream build at a stable release's commit; the package's upstream version is that build number with the `b` prefix removed.
 
 | Variant   | Upstream image | Architectures   | Selected when                                |
 | --------- | -------------- | --------------- | -------------------------------------------- |
@@ -171,9 +171,9 @@ One check, on the daemon.
 
 | Check                     | Method                 | Grace Period |
 | ------------------------- | ---------------------- | ------------ |
-| `primary` "llama.cpp API" | Port 8080 is listening | 1 hour       |
+| `primary` "llama.cpp API" | HTTP GET `/health` on port 8080 succeeds | 1 hour       |
 
-**The hour-long grace is for the model download**, which happens on the first start after a selection and is bounded only by size and bandwidth.
+**The hour-long grace is for the model download**, which happens on the first start after a selection and is bounded only by size and bandwidth. The server opens its port before loading the model, but `/health` returns HTTP 503 until loading completes; an open port alone is not readiness. The probe runs inside `llama-cpp-sub`, bypassing the proxy's authentication. A failure after the grace period calls for checking download errors, available memory, and the daemon logs.
 
 With no model selected the daemon idles rather than exiting, and the check's failure message names the action to run — so an unconfigured install reports what to do rather than looking broken.
 
@@ -196,6 +196,7 @@ The `main` volume is backed up — `sdk.Backups.ofVolumes('main')` — with one 
 7. **Extra server flags are split on whitespace**, so quoted arguments containing spaces do not survive.
 8. **Models are excluded from backups.** After a restore, the selected model downloads again on first start.
 9. **Downloaded models are listed by repo and file.** A cached file matching a curated preset's quant is not duplicated; other quants from the same repo remain separate entries. Downloaded entries do not expose context or GPU-layer settings — use Custom for those.
+10. **Saved inference states are upstream-version-specific.** Custom `--slot-save-path` caches may need to be recreated after an update; the package does not convert them. This does not affect downloaded GGUF weights or `store.json`.
 
 ---
 
