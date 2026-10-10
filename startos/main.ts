@@ -26,13 +26,10 @@ export const main = sdk.setupMain(async ({ effects }) => {
       exec: { command: ['sleep', 'infinity'] },
       ready: {
         display: i18n('llama.cpp API'),
-        fn: () =>
-          sdk.healthCheck.checkPortListening(effects, apiPort, {
-            successMessage: i18n('The llama.cpp API is ready'),
-            errorMessage: i18n(
-              'No model selected. Run the "Set Model" action.',
-            ),
-          }),
+        fn: async () => ({
+          result: 'failure',
+          message: i18n('No model selected. Run the "Set Model" action.'),
+        }),
       },
       requires: [],
     })
@@ -60,10 +57,23 @@ export const main = sdk.setupMain(async ({ effects }) => {
       display: i18n('llama.cpp API'),
       gracePeriod: 60 * 60 * 1000,
       fn: () =>
-        sdk.healthCheck.checkPortListening(effects, apiPort, {
-          successMessage: i18n('The llama.cpp API is ready'),
-          errorMessage: i18n('The llama.cpp API is not ready'),
-        }),
+        sdk.healthCheck.runHealthScript(
+          [
+            'curl',
+            '--fail',
+            '--silent',
+            '--show-error',
+            '--max-time',
+            '5',
+            `http://127.0.0.1:${apiPort}/health`,
+          ],
+          subcontainer,
+          {
+            timeout: 10_000,
+            message: () => i18n('The llama.cpp API is ready'),
+            errorMessage: i18n('The llama.cpp API is not ready'),
+          },
+        ),
     },
     requires: [],
   })

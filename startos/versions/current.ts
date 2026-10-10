@@ -1,58 +1,58 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '1.0.11312:2',
+  version: '11429:0',
   releaseNotes: {
-    en_US: `Fixes Delete Model Cache, which reported success without removing anything. It now lists the cached models with their size and deletes the chosen one; the model in use cannot be deleted.
+    en_US: `Updated llama.cpp to build b11429 at the stable v0.6.0 release.
 
-Updated llama.cpp to build b11312. Adds support for GLM-5.3-Flash models. Fixes out-of-bounds GPU memory writes with IQ4_NL models on NVIDIA and AMD GPUs, and integer overflows when parsing GGUF model files.
+- Adds Clef text/vision and Nimble decision models, the /v1/systemone decision API, and model input/output modalities in /v1/models. Adds MTP speculative decoding for Qwen4Exp and reduces its indexer memory use.
+- Fixes speculative decoding, KV-cache restoration, CUDA memory faults, and Vulkan flash-attention memory writes.
+- The API health check now waits for the model to finish loading instead of reporting ready as soon as the port opens.
+- Saved inference states use a new format. If you use --slot-save-path, recreate old saved slot caches by replaying their prompts and saving again. Downloaded GGUF weights and model settings do not need conversion.
+- Updates the StartOS SDK.
 
-Full commit range: https://github.com/ggml-org/llama.cpp/compare/b11277...b11312
+[Full upstream release notes](https://github.com/ggml-org/llama.cpp/releases/tag/v0.6.0)
+[Changes since the previous build](https://github.com/ggml-org/llama.cpp/compare/b11312...b11429)`,
+    es_ES: `Actualiza llama.cpp a la compilación b11429 de la versión estable v0.6.0.
 
-- Set UI Password asks for confirmation only when it replaces an existing password, and labels the credentials it shows in your language.
-- Set Model lists each preset with the memory it needs.
-- Delete Model Cache starts with no model selected.
-- Set Model also lists the models already downloaded to your box, so one fetched before can be selected again without retyping its HuggingFace repo or re-downloading it. A downloaded file that is a curated preset's quant stays under its preset entry; other quants from the same repo are listed separately.`,
-    es_ES: `Corrige «Eliminar caché del modelo», que indicaba éxito sin eliminar nada. Ahora muestra los modelos en caché con su tamaño y elimina el elegido; el modelo en uso no se puede eliminar.
+- Añade los modelos de decisión Clef de texto e imagen y Nimble, la API de decisión /v1/systemone y las modalidades de entrada y salida del modelo en /v1/models. Añade decodificación especulativa MTP para Qwen4Exp y reduce el uso de memoria de su indexador.
+- Corrige la decodificación especulativa, la restauración de la caché KV, fallos de memoria de CUDA y escrituras en memoria de la atención flash de Vulkan.
+- La comprobación de salud de la API ahora espera a que el modelo termine de cargarse en lugar de indicar que está listo en cuanto se abre el puerto.
+- Los estados de inferencia guardados usan un formato nuevo. Si usa --slot-save-path, vuelva a crear las cachés de ranura antiguas reproduciendo sus prompts y guardándolas de nuevo. Los pesos GGUF descargados y la configuración del modelo no necesitan conversión.
+- Actualiza el SDK de StartOS.
 
-Actualiza llama.cpp a la compilación b11312. Añade compatibilidad con los modelos GLM-5.3-Flash. Corrige escrituras fuera de límites en la memoria de la GPU con modelos IQ4_NL en GPU NVIDIA y AMD, y desbordamientos de enteros al analizar archivos de modelo GGUF.
+[Notas completas de la versión original](https://github.com/ggml-org/llama.cpp/releases/tag/v0.6.0)
+[Cambios desde la compilación anterior](https://github.com/ggml-org/llama.cpp/compare/b11312...b11429)`,
+    de_DE: `Aktualisiert llama.cpp auf Build b11429 der stabilen Veröffentlichung v0.6.0.
 
-Rango completo de commits: https://github.com/ggml-org/llama.cpp/compare/b11277...b11312
+- Ergänzt die Entscheidungsmodelle Clef für Text und Bilder sowie Nimble, die Entscheidungs-API /v1/systemone und die Ein- und Ausgabemodalitäten des Modells in /v1/models. Ergänzt spekulatives MTP-Decoding für Qwen4Exp und senkt den Speicherbedarf seines Indexers.
+- Behebt Fehler beim spekulativen Decoding, beim Wiederherstellen des KV-Caches, bei CUDA-Speicherzugriffen und bei Schreibzugriffen der Vulkan-Flash-Attention.
+- Die API-Zustandsprüfung wartet jetzt, bis das Modell vollständig geladen ist, statt Bereitschaft zu melden, sobald der Port geöffnet wird.
+- Gespeicherte Inferenzzustände verwenden ein neues Format. Bei Verwendung von --slot-save-path müssen alte Slot-Caches durch erneutes Verarbeiten ihrer Prompts und anschließendes Speichern neu erstellt werden. Heruntergeladene GGUF-Gewichte und Modelleinstellungen benötigen keine Konvertierung.
+- Aktualisiert das StartOS-SDK.
 
-- «Establecer contraseña de la interfaz» pide confirmación solo cuando reemplaza una contraseña existente y muestra las credenciales en su idioma.
-- «Establecer modelo» muestra cada preset con la memoria que necesita.
-- «Eliminar caché del modelo» comienza sin ningún modelo seleccionado.
-- «Establecer modelo» también muestra los modelos ya descargados en su dispositivo, de modo que uno descargado antes se puede volver a seleccionar sin reescribir su repositorio de HuggingFace ni volver a descargarlo. Un archivo descargado que corresponde a la cuantización de un preset permanece en su entrada de preset; las demás cuantizaciones del mismo repositorio se listan por separado.`,
-    de_DE: `Behebt „Modell-Cache löschen“, das Erfolg meldete, ohne etwas zu entfernen. Die Aktion listet jetzt die zwischengespeicherten Modelle mit ihrer Größe auf und löscht das gewählte; das verwendete Modell kann nicht gelöscht werden.
+[Vollständige Upstream-Veröffentlichungsnotizen](https://github.com/ggml-org/llama.cpp/releases/tag/v0.6.0)
+[Änderungen seit dem vorherigen Build](https://github.com/ggml-org/llama.cpp/compare/b11312...b11429)`,
+    pl_PL: `Aktualizuje llama.cpp do kompilacji b11429 ze stabilnego wydania v0.6.0.
 
-Aktualisiert llama.cpp auf Build b11312. Fügt Unterstützung für GLM-5.3-Flash-Modelle hinzu. Behebt Schreibzugriffe außerhalb der Grenzen des GPU-Speichers bei IQ4_NL-Modellen auf NVIDIA- und AMD-GPUs sowie Ganzzahlüberläufe beim Einlesen von GGUF-Modelldateien.
+- Dodaje modele decyzyjne Clef dla tekstu i obrazu oraz Nimble, API decyzyjne /v1/systemone i informacje o modalnościach wejścia i wyjścia modelu w /v1/models. Dodaje dekodowanie spekulatywne MTP dla Qwen4Exp i zmniejsza zużycie pamięci jego indeksera.
+- Naprawia dekodowanie spekulatywne, przywracanie pamięci podręcznej KV, błędy pamięci CUDA i zapisy do pamięci w mechanizmie flash attention Vulkan.
+- Kontrola stanu API czeka teraz na zakończenie ładowania modelu, zamiast zgłaszać gotowość od razu po otwarciu portu.
+- Zapisane stany wnioskowania używają nowego formatu. Jeśli używasz --slot-save-path, utwórz ponownie stare pamięci podręczne slotów, ponownie przetwarzając ich prompty i zapisując je. Pobrane wagi GGUF i ustawienia modelu nie wymagają konwersji.
+- Aktualizuje SDK StartOS.
 
-Vollständiger Commit-Bereich: https://github.com/ggml-org/llama.cpp/compare/b11277...b11312
+[Pełne informacje o wydaniu projektu źródłowego](https://github.com/ggml-org/llama.cpp/releases/tag/v0.6.0)
+[Zmiany od poprzedniej kompilacji](https://github.com/ggml-org/llama.cpp/compare/b11312...b11429)`,
+    fr_FR: `Met à jour llama.cpp vers la compilation b11429 de la version stable v0.6.0.
 
-- „UI-Passwort festlegen“ fragt nur dann nach einer Bestätigung, wenn es ein vorhandenes Passwort ersetzt, und beschriftet die angezeigten Zugangsdaten in Ihrer Sprache.
-- „Modell festlegen“ zeigt zu jedem Preset den benötigten Speicher an.
-- „Modell-Cache löschen“ beginnt ohne ausgewähltes Modell.
-- „Modell festlegen“ listet jetzt auch die bereits heruntergeladenen Modelle auf, sodass ein zuvor heruntergeladenes Modell erneut ausgewählt werden kann, ohne sein HuggingFace-Repository erneut einzugeben oder es erneut herunterzuladen. Eine heruntergeladene Datei, die der Quantisierung eines kuratierten Presets entspricht, bleibt unter dessen Eintrag; andere Quantisierungen aus demselben Repository werden separat aufgeführt.`,
-    pl_PL: `Naprawia akcję „Usuń pamięć podręczną modelu”, która zgłaszała sukces, nic nie usuwając. Teraz wyświetla modele w pamięci podręcznej wraz z rozmiarem i usuwa wybrany; używanego modelu nie można usunąć.
+- Ajoute les modèles de décision Clef pour le texte et les images et Nimble, l’API de décision /v1/systemone et les modalités d’entrée et de sortie du modèle dans /v1/models. Ajoute le décodage spéculatif MTP pour Qwen4Exp et réduit la consommation mémoire de son indexeur.
+- Corrige le décodage spéculatif, la restauration du cache KV, les erreurs mémoire CUDA et les écritures mémoire de l’attention flash Vulkan.
+- Le contrôle de santé de l’API attend désormais la fin du chargement du modèle au lieu d’indiquer qu’elle est prête dès l’ouverture du port.
+- Les états d’inférence enregistrés utilisent un nouveau format. Si vous utilisez --slot-save-path, recréez les anciens caches d’emplacement en rejouant leurs prompts puis en les enregistrant à nouveau. Les poids GGUF téléchargés et les réglages du modèle ne nécessitent aucune conversion.
+- Met à jour le SDK StartOS.
 
-Aktualizuje llama.cpp do kompilacji b11312. Dodaje obsługę modeli GLM-5.3-Flash. Naprawia zapisy poza granicami pamięci GPU przy modelach IQ4_NL na kartach NVIDIA i AMD oraz przepełnienia liczb całkowitych podczas parsowania plików modeli GGUF.
-
-Pełny zakres commitów: https://github.com/ggml-org/llama.cpp/compare/b11277...b11312
-
-- „Ustaw hasło interfejsu” prosi o potwierdzenie tylko wtedy, gdy zastępuje istniejące hasło, i opisuje wyświetlane dane logowania w Twoim języku.
-- „Ustaw model” pokazuje przy każdym presecie wymaganą ilość pamięci.
-- „Usuń pamięć podręczną modelu” rozpoczyna bez wybranego modelu.
-- „Ustaw model” wyświetla też modele już pobrane na urządzenie, więc wcześniej pobrany model można wybrać ponownie bez wpisywania jego repozytorium HuggingFace i ponownego pobierania. Pobrany plik odpowiadający kwantyzacji wyselekcjonowanego presetu pozostaje pod jego pozycją; inne kwantyzacje z tego samego repozytorium są wymienione osobno.`,
-    fr_FR: `Corrige « Supprimer le cache du modèle », qui signalait un succès sans rien supprimer. L’action liste désormais les modèles en cache avec leur taille et supprime celui choisi ; le modèle en cours d’utilisation ne peut pas être supprimé.
-
-Met à jour llama.cpp vers la compilation b11312. Ajoute la prise en charge des modèles GLM-5.3-Flash. Corrige des écritures hors limites dans la mémoire GPU avec les modèles IQ4_NL sur les GPU NVIDIA et AMD, ainsi que des dépassements d'entiers lors de l'analyse des fichiers de modèle GGUF.
-
-Plage complète des commits : https://github.com/ggml-org/llama.cpp/compare/b11277...b11312
-
-- « Définir le mot de passe de l’interface » ne demande une confirmation que lorsqu’elle remplace un mot de passe existant, et affiche les identifiants dans votre langue.
-- « Définir le modèle » indique pour chaque préréglage la mémoire nécessaire.
-- « Supprimer le cache du modèle » démarre sans modèle sélectionné.
-- « Définir le modèle » liste aussi les modèles déjà téléchargés sur votre appareil, de sorte qu’un modèle téléchargé auparavant peut être resélectionné sans ressaisir son dépôt HuggingFace ni le retélécharger. Un fichier téléchargé correspondant à la quantification d’un préréglage reste sous son entrée ; les autres quantifications du même dépôt sont listées séparément.`,
+[Notes complètes de la version amont](https://github.com/ggml-org/llama.cpp/releases/tag/v0.6.0)
+[Modifications depuis la compilation précédente](https://github.com/ggml-org/llama.cpp/compare/b11312...b11429)`,
   },
   migrations: {
     up: async ({ effects }) => {},
