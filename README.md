@@ -35,7 +35,7 @@
 
 ## Image and Container Runtime
 
-The upstream image is used unmodified, but **the package is built four times** — one variant per accelerator — and StartOS installs whichever matches your hardware. Images are pinned to the upstream build at a stable release's commit; the package's upstream version is that build number with the `b` prefix removed.
+The upstream image runs with its CA store upgraded by the root `Dockerfile` (a temporary layer that comes out once upstream ships an image built on a fixed store). **The package is built four times** — one variant per accelerator — and StartOS installs whichever matches your hardware. Images are pinned to the upstream build at a stable release's commit; the package's upstream version is that build number with the `b` prefix removed.
 
 | Variant   | Upstream image | Architectures   | Selected when                                |
 | --------- | -------------- | --------------- | -------------------------------------------- |
@@ -204,7 +204,7 @@ The `main` volume is backed up — `sdk.Backups.ofVolumes('main')` — with one 
 
 ```yaml
 package_id: llama-cpp
-image: ghcr.io/ggml-org/llama.cpp # server, server-cuda, server-rocm, or server-vulkan per variant
+image: ghcr.io/ggml-org/llama.cpp + root Dockerfile (CA store upgrade) # server, server-cuda, server-rocm, or server-vulkan per variant
 architectures:
   - x86_64
   - aarch64 # not for the rocm variant
