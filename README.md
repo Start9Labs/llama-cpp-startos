@@ -78,10 +78,11 @@ One model. Two of its keys decide whether the service can run at all; the third 
 | `serveArgs`      | The full argument list handed to `llama-server`, composed by the Set Model action               |
 | `uiPassword`     | The password for the proxy's basic auth; the username is always `admin`                         |
 | `modelSelection` | What the Set Model form last submitted, so it can be prefilled next time — read by nothing else |
+| `modelSettings`  | Context size, GPU layers and extra flags last used for each model — read only by Set Model      |
 
 Nothing else writes the file, and neither `serveArgs` nor `uiPassword` is defaulted — both are absent until you run their action, and each absence raises a task.
 
-`modelSelection` holds the chosen `selection` plus, when Custom was chosen, a `custom` object carrying that variant's fields; picking a preset clears `custom`. The daemon never reads it, so it cannot disagree with `serveArgs` about what is actually running — at worst it prefills a form with a stale answer.
+`modelSelection` holds the chosen `selection` plus a `custom` object with the last Custom submission's fields; picking another entry leaves `custom` in place so Custom stays prefilled. `modelSettings` is a list of `{hfRepo, hfFile, ctx, ngl, extraArgs}`, one per model, replaced on each submit of that model. Entries are matched to the list by the weights they resolve to — the same cached file, or the same quant tag before download — so a Custom model keeps its settings once it shows up as a downloaded entry. Stores from before `modelSettings` fall back to `modelSelection.custom`. The daemon reads neither, so they cannot disagree with `serveArgs` about what is actually running — at worst they prefill a form with a stale answer.
 
 **No configuration file reaches the application.** Two environment variables are set, both redirecting caches onto the volume so downloaded weights survive a container rebuild:
 
@@ -127,12 +128,13 @@ Three actions, all user-facing.
 
 Chooses what the server runs — either a curated preset or a model of your own.
 
-- **What it changes:** `serveArgs` and `modelSelection` in `store.json`, replacing each entirely.
+- **What it changes:** `serveArgs` and `modelSelection` in `store.json`, replacing each entirely, and the chosen model's entry in `modelSettings`.
 - **Cost:** seconds to write, then a restart — and, if the model is not already cached, a download that can take a long time.
 - **Repeat safety:** safe to re-run. Switching back to a previously used model is fast, because the old one is still cached.
-- **The form reopens on your current selection**, read back from `modelSelection`, so changing one setting does not mean re-entering the rest. With nothing chosen yet it falls back to the hardware-filtered default.
+- **Every entry has its own context size, GPU layers and extra flags**, prefilled with what that model last ran with (`modelSettings`), or with the preset's context and full GPU offload the first time. Switching to another model and back keeps them.
+- **The form reopens on the running model**, which stays selectable: change its settings and submit to restart with them. Submitting it unchanged writes the same `serveArgs` and does not restart. With nothing chosen yet the form falls back to the hardware-filtered default.
 - **Presets are filtered to your hardware.** The form reads the accelerator's memory — VRAM on NVIDIA and ROCm, system memory otherwise — and disables any preset that would not fit, defaulting to the smallest that does. The field's help text lists every preset with the memory it needs. The estimate is the quantized weights plus roughly a quarter for the context cache.
-- **Models already downloaded to the volume appear in the same list**, so a model you fetched before can be reselected without retyping its repo or re-downloading it. A downloaded file that is a preset's quant stays under that preset, while other quants of the same repo get their own entries. A downloaded entry is passed to `llama-server` as `-hf <org>/<repo> -hff <file>` so the exact cached quant is reused. Those entries run at a fixed 8192-token context with full GPU offload; use Custom for anything else.
+- **Models already downloaded to the volume appear in the same list**, so a model you fetched before can be reselected without retyping its repo or re-downloading it. A downloaded file that is a preset's quant stays under that preset, while other quants of the same repo get their own entries. A downloaded entry is passed to `llama-server` as `-hf <org>/<repo> -hff <file>` so the exact cached quant is reused; a first-time downloaded entry defaults to an 8192-token context. When the entry is the running model, its repo and file arguments are kept as they were written.
 - **Custom** takes a HuggingFace GGUF repo, optionally a specific file, a context size, a GPU-layer count, and extra server flags. Those extra flags are split on whitespace, so a quoted value with spaces will not survive.
 
 ### Set UI Password
@@ -169,8 +171,8 @@ Because they are conditional, clearing either value later raises its task again 
 
 One check, on the daemon.
 
-| Check                     | Method                 | Grace Period |
-| ------------------------- | ---------------------- | ------------ |
+| Check                     | Method                                   | Grace Period |
+| ------------------------- | ---------------------------------------- | ------------ |
 | `primary` "llama.cpp API" | HTTP GET `/health` on port 8080 succeeds | 1 hour       |
 
 **The hour-long grace is for the model download**, which happens on the first start after a selection and is bounded only by size and bandwidth. The server opens its port before loading the model, but `/health` returns HTTP 503 until loading completes; an open port alone is not readiness. The probe runs inside `llama-cpp-sub`, bypassing the proxy's authentication. A failure after the grace period calls for checking download errors, available memory, and the daemon logs.
@@ -195,7 +197,7 @@ The `main` volume is backed up — `sdk.Backups.ofVolumes('main')` — with one 
 6. **Model presets are filtered by detected memory**, and the fit estimate is approximate — a preset that is enabled can still be tight at large context sizes.
 7. **Extra server flags are split on whitespace**, so quoted arguments containing spaces do not survive.
 8. **Models are excluded from backups.** After a restore, the selected model downloads again on first start.
-9. **Downloaded models are listed by repo and file.** A cached file matching a curated preset's quant is not duplicated; other quants from the same repo remain separate entries. Downloaded entries do not expose context or GPU-layer settings — use Custom for those.
+9. **Downloaded models are listed by repo and file.** A cached file matching a curated preset's quant is not duplicated; other quants from the same repo remain separate entries. Settings are remembered per model, so deleting a model with Delete Model Cache and downloading it again keeps them.
 10. **Saved inference states are upstream-version-specific.** Custom `--slot-save-path` caches may need to be recreated after an update; the package does not convert them. This does not affect downloaded GGUF weights or `store.json`.
 
 ---

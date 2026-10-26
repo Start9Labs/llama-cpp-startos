@@ -19,6 +19,18 @@ const shape = z.looseObject({
     })
     .optional()
     .catch(undefined),
+  modelSettings: z
+    .array(
+      z.looseObject({
+        hfRepo: z.string(),
+        hfFile: z.string().optional(),
+        ctx: z.number(),
+        ngl: z.number(),
+        extraArgs: z.string().optional(),
+      }),
+    )
+    .optional()
+    .catch(undefined),
 })
 
 export const storeJson = FileHelper.json(
