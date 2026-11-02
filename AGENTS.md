@@ -38,3 +38,4 @@ verified, tried, and decided belongs in the commit message and the PR body.
 - **Don't widen the AMD matcher to a bare `amdgpu` match.** ROCm fails on integrated Radeon, and StartOS's regex engine has no lookahead to exclude them, so it stays a positive allowlist of discrete product names.
 - **Don't shorten the health check's one-hour grace period.** It covers the model download on first start.
 - **New presets go in `startos/actions/presets.ts`**, with `minMemoryGB` set to the weights plus roughly 25% for the KV cache.
+- **Keep the Web UI host on Basic auth and the API host on Bearer.** One binding takes one `ProxyAuth`, and StartOS enforces it on the bridge address too, so moving siblings to `api-multi` or merging the hosts locks out browsers or other services.

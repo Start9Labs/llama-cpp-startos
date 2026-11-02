@@ -9,8 +9,10 @@ const dict = {
   'No model selected. Run the "Set Model" action.': 4,
 
   // interfaces.ts
-  'llama.cpp Server': 5,
-  'OpenAI-compatible API and built-in chat UI': 6,
+  'Web UI': 5,
+  'The built-in chat UI, for your browser. Log in as "admin" with the password from Set UI Password.': 6,
+  'OpenAI-compatible API': 54,
+  'For OpenAI-compatible clients and apps. Requires the key from the API Key action. Append /v1 to the address.': 55,
 
   // actions/setModel.ts
   'Set Model': 7,
@@ -64,6 +66,13 @@ const dict = {
   'Use these credentials to log in to the llama.cpp web UI in your browser.': 50,
   Username: 51,
   Password: 52,
+
+  // actions/apiKey.ts
+  'Generate a new key': 56,
+  'Replace the key. Clients outside StartOS must be updated with the new one; services on this server pick it up when they restart.': 57,
+  'API Key': 58,
+  'Show the key for the OpenAI-compatible API interface, or generate a new one.': 59,
+  'Send this key as "Authorization: Bearer <key>" to the OpenAI-compatible API interface. In most clients, set the base URL to that interface\'s address with /v1 appended and paste this as the API key.': 60,
 
   // init/initializeService.ts
   'Generate a password to log in to the llama.cpp web UI': 39,

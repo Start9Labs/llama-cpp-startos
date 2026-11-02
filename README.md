@@ -57,9 +57,10 @@ The AMD requirement matches discrete cards by product name rather than excluding
 
 One volume, and most of it is downloaded models.
 
-| Volume | Mount Point | Purpose                                                                         |
-| ------ | ----------- | ------------------------------------------------------------------------------- |
-| `main` | `/data`     | `store.json`, the GGUF model cache under `models/`, and HuggingFace's own cache |
+| Volume   | Mount Point | Purpose                                                                                    |
+| -------- | ----------- | ------------------------------------------------------------------------------------------ |
+| `main`   | `/data`     | `store.json`, the GGUF model cache under `models/`, and HuggingFace's own cache            |
+| `public` | (none)      | `credentials.json` with the API key; dependent services mount it read-only to read the key |
 
 Models are the bulk of it — a single quantized model runs from roughly one to forty gigabytes depending on size.
 
@@ -67,11 +68,12 @@ llama.cpp keeps the cache in the HuggingFace hub layout: each repo is `models/mo
 
 ## File Models
 
-One model. Two of its keys decide whether the service can run at all; the third only exists so a form can remember what you last told it.
+Two models. Two of `store.json`'s keys decide whether the service can run at all; the others only exist so a form can remember what you last told it.
 
-| File         | Format | Modelled                | Written by                                |
-| ------------ | ------ | ----------------------- | ----------------------------------------- |
-| `store.json` | JSON   | Yes — `FileHelper.json` | The Set Model and Set UI Password actions |
+| File               | Format | Modelled                | Written by                                 |
+| ------------------ | ------ | ----------------------- | ------------------------------------------ |
+| `store.json`       | JSON   | Yes — `FileHelper.json` | The Set Model and Set UI Password actions  |
+| `credentials.json` | JSON   | Yes — `FileHelper.json` | Init (when missing) and the API Key action |
 
 | Key              | Notes                                                                                           |
 | ---------------- | ----------------------------------------------------------------------------------------------- |
@@ -81,6 +83,8 @@ One model. Two of its keys decide whether the service can run at all; the third 
 | `modelSettings`  | Context size, GPU layers and extra flags last used for each model — read only by Set Model      |
 
 Nothing else writes the file, and neither `serveArgs` nor `uiPassword` is defaulted — both are absent until you run their action, and each absence raises a task.
+
+`credentials.json` on the `public` volume holds one key, `apiKey`: the Bearer token for the OpenAI-compatible API interface. Init generates it (32 alphanumeric characters) whenever it is missing — on install, on update from a version without it, or after it is deleted — so it is never empty while the service runs.
 
 `modelSelection` holds the chosen `selection` plus a `custom` object with the last Custom submission's fields; picking another entry leaves `custom` in place so Custom stays prefilled. `modelSettings` is a list of `{hfRepo, hfFile, ctx, ngl, extraArgs}`, one per model, replaced on each submit of that model. Entries are matched to the list by the weights they resolve to — the same cached file, or the same quant tag before download — so a Custom model keeps its settings once it shows up as a downloaded entry. Stores from before `modelSettings` fall back to `modelSelection.custom`. The daemon reads neither, so they cannot disagree with `serveArgs` about what is actually running — at worst they prefill a form with a stale answer.
 
@@ -99,15 +103,17 @@ None.
 
 ## Network Access and Interfaces
 
-One interface, serving both the OpenAI-compatible API and llama.cpp's built-in chat UI.
+Two interfaces, on two hosts that both forward to llama-server's internal port 8080. They serve the same thing — the OpenAI-compatible API and the built-in chat UI — and differ only in the credential the StartOS proxy demands.
 
-| Interface        | Id    | Type | Port | Description                          |
-| ---------------- | ----- | ---- | ---- | ------------------------------------ |
-| llama.cpp Server | `api` | ui   | 8080 | The API and the built-in chat client |
+| Interface             | Id           | Host        | Type | Internal port | Auth at the proxy                        |
+| --------------------- | ------------ | ----------- | ---- | ------------- | ---------------------------------------- |
+| Web UI                | `api`        | `api-multi` | ui   | 8080          | Basic, `admin` + `uiPassword`            |
+| OpenAI-compatible API | `openai-api` | `api-key`   | api  | 8080          | Bearer, `apiKey` from `credentials.json` |
 
-**Authentication is added by StartOS, not by llama.cpp.** The server itself runs keyless; the binding declares HTTP basic auth at the edge, with the username `admin` and the password from `store.json`. Until a password is set the binding is configured with an empty one — which never serves anything, because the service is blocked from starting by a `critical` task at the same time.
+**Authentication is added by StartOS, not by llama.cpp.** The server itself runs keyless. Since StartOS 0.4.1 the proxy enforces a binding's auth on its plaintext bridge address (`10.0.3.1:<port>`) as well as on the LAN, so other services are challenged like any other client. Browsers can only answer a Basic challenge and OpenAI clients only send a Bearer key, which is why there are two hosts.
 
-An OpenAI-compatible client therefore needs those basic-auth credentials as well as whatever it would normally send.
+- **Web UI:** until a password is set the binding is configured with an empty one — which never serves anything, because the service is blocked from starting by a `critical` task at the same time.
+- **OpenAI-compatible API:** the binding exists only once the key does; init creates it before the interfaces are set. Dependent services resolve this host's bridge address (`apiKeyHostId`, `apiPort` from `startos/utils.ts`) and read the key from the `public` volume. A key of the wrong type or value gets `401` with `WWW-Authenticate: Bearer`.
 
 ## Installation and First-Run Flow
 
@@ -122,7 +128,7 @@ The first start after choosing a model **downloads it**, which is why the health
 
 ## Actions
 
-Three actions, all user-facing.
+Four actions, all user-facing.
 
 ### Set Model
 
@@ -145,6 +151,15 @@ Generates the password for the API and chat UI.
 - **Cost:** seconds, then a restart.
 - **Repeat safety:** safe to re-run, but it **replaces** the existing password — every saved client login has to be updated. When a password already exists it asks for confirmation first; the first run does not.
 - **Outputs:** the username `admin` and the new password.
+
+### API Key
+
+Shows the Bearer key for the OpenAI-compatible API interface.
+
+- **Input:** one toggle, **Generate a new key**, off by default.
+- **What it changes:** nothing when the toggle is off. When on — or when no key exists — it writes a new `apiKey` to `credentials.json`, which rebinds the API host with the new token. llama-server does not restart.
+- **Repeat safety:** safe to re-run. Rotating breaks every client still sending the old key; dependent StartOS services that read the key reactively pick up the new one when they restart.
+- **Outputs:** the key, masked and copyable.
 
 ### Delete Model Cache
 
@@ -181,16 +196,16 @@ With no model selected the daemon idles rather than exiting, and the check's fai
 
 ## Backups and Restore
 
-The `main` volume is backed up — `sdk.Backups.ofVolumes('main')` — with one exclusion: `setOptions({ exclude: ['models/'] })` leaves out `/data/models`, the model cache. No dump step.
+The `main` and `public` volumes are backed up — `sdk.Backups.ofVolumes('main', 'public')` — with one exclusion: `setOptions({ exclude: ['models/'] })` leaves out `/data/models`, the model cache. No dump step.
 
-- **Included:** `store.json` with the model selection and password.
+- **Included:** `store.json` with the model selection and password, and `credentials.json` with the API key, so dependent services keep working after a restore.
 - **Excluded:** every downloaded model. Weights are re-downloadable from upstream, so the backup stays small rather than being dominated by the cache.
-- **Restore:** the selection and password come back and no tasks are raised. The selected model is downloaded again on the first start, inside the health check's one-hour grace.
+- **Restore:** the selection, password and API key come back and no tasks are raised. The selected model is downloaded again on the first start, inside the health check's one-hour grace.
 
 ## Limitations and Differences
 
 1. **Two settings are required before the service does anything**, and each is enforced by a blocking task rather than defaulted.
-2. **Authentication is the reverse proxy's, not llama.cpp's.** Every client, including API clients, must send basic-auth credentials.
+2. **Authentication is the reverse proxy's, not llama.cpp's.** Browsers log in to the Web UI interface with Basic auth; API clients send the API key as a Bearer token to the OpenAI-compatible API interface. Neither credential works on the other interface.
 3. **Which accelerator variant you get is decided by StartOS**, from the hardware present; it is not a setting.
 4. **Integrated AMD graphics fall back to the generic CPU build.** ROCm is matched only for discrete cards.
 5. **The Vulkan variant matches Intel GPUs only**, on the `i915` driver.
@@ -217,17 +232,21 @@ subcontainers:
   - detect-mem # temporary; preset sizing
 volumes:
   main: /data
+  public: null # credentials.json, read by dependents
 file_models:
   - store.json
+  - credentials.json
 startos_managed_env_vars:
   - LLAMA_CACHE
   - HF_HOME
 dependencies: []
 interfaces:
-  api: { type: ui, port: 8080 } # basic auth enforced at the edge, username "admin"
+  api: { type: ui, host: api-multi, port: 8080 } # Basic at the edge, username "admin"
+  openai-api: { type: api, host: api-key, port: 8080 } # Bearer at the edge, key in public/credentials.json
 actions:
   - set-model
   - set-ui-password
+  - api-key
   - delete-model-cache
 tasks:
   - { action: set-ui-password, severity: critical }

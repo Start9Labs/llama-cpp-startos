@@ -7,9 +7,8 @@
 
 ## What you get on StartOS
 
-- An OpenAI-compatible HTTP API at `<your-interface-url>/v1`, serving one GGUF model at a time.
-- The upstream chat UI at the same URL — open the interface in a browser to chat without setting up a client.
-- A password-protected login (username `admin`) on the UI and API, so only you can use them. Other StartOS AI apps that depend on llama.cpp (such as Open WebUI) connect over the internal network with no login to copy.
+- The upstream chat UI on the **Web UI** interface — open it in a browser to chat without setting up a client. It asks for a login (username `admin`).
+- An OpenAI-compatible HTTP API on the **OpenAI-compatible API** interface, at `<interface-url>/v1`, serving one GGUF model at a time. It takes an API key instead of a login. Other StartOS AI apps that connect to llama.cpp (such as Open WebUI) read the key themselves, so there is nothing to copy.
 - Curated GGUF presets, plus a Custom option that accepts any HuggingFace GGUF repo.
 - Persistent model cache on the package volume — downloads happen once and survive restarts. The cache is excluded from backups; after a restore, the selected model downloads again on first start.
 
@@ -24,20 +23,20 @@ Complete both tasks, then start the service from the dashboard. The first launch
 
 ### Chat UI
 
-Open the **llama.cpp Server** interface from the Dashboard. Your browser will prompt for a login — enter `admin` and the password from **Set UI Password**. The upstream chat UI is at `/`; pick a conversation and start typing.
+Open the **Web UI** interface from the Dashboard. Your browser will prompt for a login — enter `admin` and the password from **Set UI Password**. The upstream chat UI is at `/`; pick a conversation and start typing.
 
 ### OpenAI-compatible API
 
-Point any OpenAI-compatible client at the same URL with `/v1` appended:
+Use the **OpenAI-compatible API** interface for clients and apps, with `/v1` appended:
 
-- **Base URL:** `<your-interface-url>/v1`
-- **Authentication:** the interface is gated by HTTP basic auth — username `admin`, password from **Set UI Password**. Most OpenAI clients only offer an "API key" field (sent as a bearer token), which the proxy won't accept; for those, use a client that supports basic auth, or call the API with `curl -u admin:<password>`.
+- **Base URL:** `<api-interface-url>/v1`
+- **API key:** the key from the **API Key** action. The Web UI password does not work here, and the key does not work on the Web UI interface.
 - **Model name:** llama.cpp serves a single model, so most clients accept any string or an empty value here.
 
 Quick test from the command line:
 
 ```sh
-curl -s -u admin:<your-ui-password> <your-interface-url>/v1/chat/completions \
+curl -s -H "Authorization: Bearer <your-api-key>" <api-interface-url>/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"messages":[{"role":"user","content":"Say hello in one short sentence."}]}'
 ```
@@ -46,6 +45,7 @@ curl -s -u admin:<your-ui-password> <your-interface-url>/v1/chat/completions \
 
 - **Set Model** — switch to a different preset, a model you already downloaded, or a custom GGUF. The form opens on the model you are running, with its settings filled in, so you can change its context size or flags and submit; submitting without changes does not restart anything. Each model remembers its own settings, so switching away and back keeps them. The service restarts with the new weights; uncached models download on this restart.
 - **Set UI Password** — generate a new web UI password (username stays `admin`). Use it for first-time setup or to rotate the password later; when rotating, it asks you to confirm, since saved logins stop working.
+- **API Key** — show the key for the OpenAI-compatible API interface. Turn on **Generate a new key** to replace it; clients outside StartOS then need the new key, and StartOS apps pick it up when they restart.
 - **Delete Model Cache** — pick a downloaded model from the list, with its size, and remove it to reclaim disk space. The model you are currently running can't be deleted; switch to another one with Set Model first. A deleted model will be re-downloaded if you select it again.
 
 ## Limitations
