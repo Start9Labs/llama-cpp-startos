@@ -1,53 +1,33 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '11960:0',
+  version: '11960:1',
   releaseNotes: {
-    en_US: `Updated llama.cpp to build b11960 at the stable v0.8.0 release.
+    en_US: `Adds an OpenAI-compatible API interface with its own API key, so other services and API clients can reach llama.cpp again.
 
-- Adds LiquidAI LFM3 text, vision and audio models, DeepSeek V4.1 Flash, SenseNova U1 and other architectures. Compatible audio models gain realtime conversation and transcription APIs and a text-to-speech endpoint.
-- The chat UI gains conversation search, conversation compaction and template-specific reasoning controls. Improves tool calling, model downloads, GPU performance and caching of CPU-resident MoE experts.
-- Limits grammar recursion and rejects deeply nested JSON to prevent crashes. Existing model settings and downloaded GGUF weights need no conversion; custom saved slot caches may need to be recreated after updating.
-- Updates the StartOS SDK to 3.1.1 with container-startup fixes. Retains the protective CA-store upgrade.
+- Since StartOS 0.4.1, the web UI's password also protects llama.cpp's address inside the server. Services such as Open WebUI and DeepSeek Harness can't send that password, so their requests failed.
+- The new interface takes the key shown by the API Key action, which can also replace it. Services on this server read the key automatically once they are updated to support it.
+- The browser interface, now named Web UI, keeps its address and password.`,
+    es_ES: `Añade una interfaz API compatible con OpenAI con su propia clave de API, para que otros servicios y clientes de API vuelvan a llegar a llama.cpp.
 
-[Full upstream release notes](https://github.com/ggml-org/llama.cpp/releases/tag/v0.8.0)
-[Changes since the previous build](https://github.com/ggml-org/llama.cpp/compare/b11669...b11960)`,
-    es_ES: `Actualiza llama.cpp a la compilación b11960 de la versión estable v0.8.0.
+- Desde StartOS 0.4.1, la contraseña de la interfaz web también protege la dirección de llama.cpp dentro del servidor. Servicios como Open WebUI y DeepSeek Harness no pueden enviar esa contraseña, por lo que sus solicitudes fallaban.
+- La nueva interfaz acepta la clave que muestra la acción Clave de API, que también puede reemplazarla. Los servicios de este servidor leen la clave automáticamente una vez actualizados para admitirla.
+- La interfaz del navegador, ahora llamada Interfaz web, conserva su dirección y contraseña.`,
+    de_DE: `Fügt eine OpenAI-kompatible API-Schnittstelle mit eigenem API-Schlüssel hinzu, sodass andere Dienste und API-Clients llama.cpp wieder erreichen.
 
-- Añade modelos LiquidAI LFM3 de texto, visión y audio, DeepSeek V4.1 Flash, SenseNova U1 y otras arquitecturas. Los modelos de audio compatibles incorporan API de conversación y transcripción en tiempo real y un endpoint de síntesis de voz.
-- La interfaz de chat incorpora búsqueda y compactación de conversaciones y controles de razonamiento específicos de cada plantilla. Mejora las llamadas a herramientas, las descargas de modelos, el rendimiento de GPU y la caché de expertos MoE residentes en la CPU.
-- Limita la recursión de las gramáticas y rechaza JSON con anidamiento excesivo para evitar fallos. La configuración del modelo y los pesos GGUF descargados no necesitan conversión; puede ser necesario recrear las cachés de ranuras guardadas mediante opciones personalizadas tras actualizar.
-- Actualiza el SDK de StartOS a 3.1.1 con correcciones del arranque de contenedores. Mantiene la actualización protectora del almacén de certificados CA.
+- Seit StartOS 0.4.1 schützt das Passwort der Web-Oberfläche auch die Adresse von llama.cpp innerhalb des Servers. Dienste wie Open WebUI und DeepSeek Harness können dieses Passwort nicht senden, daher schlugen ihre Anfragen fehl.
+- Die neue Schnittstelle akzeptiert den Schlüssel, den die Aktion „API-Schlüssel“ anzeigt und auch ersetzen kann. Dienste auf diesem Server lesen den Schlüssel automatisch, sobald sie dafür aktualisiert sind.
+- Die Browser-Schnittstelle, jetzt „Web-Oberfläche“ genannt, behält Adresse und Passwort.`,
+    pl_PL: `Dodaje interfejs API zgodny z OpenAI z własnym kluczem API, dzięki czemu inne usługi i klienty API znów mogą łączyć się z llama.cpp.
 
-[Notas completas de la versión original](https://github.com/ggml-org/llama.cpp/releases/tag/v0.8.0)
-[Cambios desde la compilación anterior](https://github.com/ggml-org/llama.cpp/compare/b11669...b11960)`,
-    de_DE: `Aktualisiert llama.cpp auf Build b11960 der stabilen Veröffentlichung v0.8.0.
+- Od StartOS 0.4.1 hasło interfejsu WWW chroni również adres llama.cpp wewnątrz serwera. Usługi takie jak Open WebUI i DeepSeek Harness nie potrafią wysłać tego hasła, więc ich żądania kończyły się błędem.
+- Nowy interfejs przyjmuje klucz pokazywany przez akcję Klucz API, która może go też wymienić. Usługi na tym serwerze odczytują klucz automatycznie po aktualizacji, która to obsługuje.
+- Interfejs przeglądarkowy, teraz nazwany Interfejs WWW, zachowuje adres i hasło.`,
+    fr_FR: `Ajoute une interface API compatible OpenAI avec sa propre clé d’API, pour que les autres services et clients d’API puissent de nouveau joindre llama.cpp.
 
-- Ergänzt LiquidAI-LFM3-Modelle für Text, Bild und Audio, DeepSeek V4.1 Flash, SenseNova U1 und weitere Architekturen. Kompatible Audiomodelle erhalten APIs für Echtzeitgespräche und Transkription sowie einen Endpunkt für Sprachsynthese.
-- Die Chat-Oberfläche erhält Gesprächssuche, Gesprächskomprimierung und vorlagenspezifische Reasoning-Steuerung. Verbessert Werkzeugaufrufe, Modelldownloads, GPU-Leistung und das Caching von MoE-Experten im CPU-Speicher.
-- Begrenzt Grammatikrekursion und weist tief verschachteltes JSON zur Vermeidung von Abstürzen zurück. Modelleinstellungen und heruntergeladene GGUF-Gewichte benötigen keine Konvertierung; benutzerdefinierte gespeicherte Slot-Caches müssen nach dem Update möglicherweise neu erstellt werden.
-- Aktualisiert das StartOS-SDK auf 3.1.1 mit Korrekturen beim Containerstart. Die schützende Aktualisierung des CA-Zertifikatsspeichers bleibt erhalten.
-
-[Vollständige Upstream-Veröffentlichungsnotizen](https://github.com/ggml-org/llama.cpp/releases/tag/v0.8.0)
-[Änderungen seit dem vorherigen Build](https://github.com/ggml-org/llama.cpp/compare/b11669...b11960)`,
-    pl_PL: `Aktualizuje llama.cpp do kompilacji b11960 ze stabilnego wydania v0.8.0.
-
-- Dodaje modele LiquidAI LFM3 obsługujące tekst, obraz i dźwięk, DeepSeek V4.1 Flash, SenseNova U1 oraz inne architektury. Zgodne modele dźwiękowe zyskują API rozmów i transkrypcji w czasie rzeczywistym oraz endpoint syntezy mowy.
-- Interfejs czatu zyskuje wyszukiwanie i kompresję rozmów oraz sterowanie rozumowaniem zależne od szablonu. Ulepsza wywoływanie narzędzi, pobieranie modeli, wydajność GPU i pamięć podręczną ekspertów MoE znajdujących się w pamięci CPU.
-- Ogranicza rekurencję gramatyk i odrzuca głęboko zagnieżdżony JSON, aby zapobiegać awariom. Ustawienia modelu i pobrane wagi GGUF nie wymagają konwersji; po aktualizacji może być konieczne ponowne utworzenie zapisanych pamięci podręcznych slotów używanych z własnymi opcjami.
-- Aktualizuje SDK StartOS do 3.1.1 z poprawkami uruchamiania kontenerów. Zachowuje ochronną aktualizację magazynu certyfikatów CA.
-
-[Pełne informacje o wydaniu projektu źródłowego](https://github.com/ggml-org/llama.cpp/releases/tag/v0.8.0)
-[Zmiany od poprzedniej kompilacji](https://github.com/ggml-org/llama.cpp/compare/b11669...b11960)`,
-    fr_FR: `Met à jour llama.cpp vers la compilation b11960 de la version stable v0.8.0.
-
-- Ajoute les modèles LiquidAI LFM3 pour le texte, la vision et l’audio, DeepSeek V4.1 Flash, SenseNova U1 et d’autres architectures. Les modèles audio compatibles gagnent des API de conversation et de transcription en temps réel ainsi qu’un point d’accès de synthèse vocale.
-- L’interface de discussion gagne la recherche et la compression des conversations ainsi que des contrôles de raisonnement propres aux modèles de conversation. Améliore les appels d’outils, les téléchargements de modèles, les performances GPU et le cache des experts MoE résidant en mémoire CPU.
-- Limite la récursion des grammaires et rejette les objets JSON trop imbriqués pour éviter les plantages. Les réglages du modèle et les poids GGUF téléchargés ne nécessitent aucune conversion ; les caches d’emplacement enregistrés avec des options personnalisées peuvent devoir être recréés après la mise à jour.
-- Met à jour le SDK StartOS vers 3.1.1 avec des corrections du démarrage des conteneurs. Conserve la mise à niveau protectrice du magasin de certificats CA.
-
-[Notes complètes de la version amont](https://github.com/ggml-org/llama.cpp/releases/tag/v0.8.0)
-[Modifications depuis la compilation précédente](https://github.com/ggml-org/llama.cpp/compare/b11669...b11960)`,
+- Depuis StartOS 0.4.1, le mot de passe de l’interface web protège aussi l’adresse de llama.cpp à l’intérieur du serveur. Des services comme Open WebUI et DeepSeek Harness ne peuvent pas envoyer ce mot de passe, leurs requêtes échouaient donc.
+- La nouvelle interface accepte la clé affichée par l’action Clé d’API, qui peut aussi la remplacer. Les services de ce serveur lisent la clé automatiquement une fois mis à jour pour la prendre en charge.
+- L’interface du navigateur, désormais nommée Interface web, conserve son adresse et son mot de passe.`,
   },
   migrations: {
     up: async ({ effects }) => {},

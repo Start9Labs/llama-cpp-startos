@@ -1,12 +1,25 @@
 import { setModel } from '../actions/setModel'
 import { setUiPassword } from '../actions/setUiPassword'
+import { credentialsJson } from '../fileModels/credentials.json'
 import { storeJson } from '../fileModels/store.json'
 import { i18n } from '../i18n'
 import { sdk } from '../sdk'
+import { generateApiKey } from '../utils'
 
 // Runs on every init (install, update, restore, and plain restart), and
 // re-runs reactively when the watched files change.
 export const initializeService = sdk.setupOnInit(async (effects) => {
+  // The API host's Bearer key: a machine key that dependent services read, so
+  // it is generated rather than asked for. Clearing it rotates it.
+  const apiKey = await credentialsJson.read((c) => c.apiKey).const(effects)
+  if (!apiKey) {
+    await credentialsJson.merge(
+      effects,
+      { apiKey: generateApiKey() },
+      { allowWriteAfterConst: true },
+    )
+  }
+
   // Prompt for a UI password whenever none is set — the proxy basic-auth gate
   // stays locked (setupInterfaces uses a throwaway) until the user runs this.
   const uiPassword = await storeJson.read((s) => s?.uiPassword).const(effects)

@@ -107,7 +107,7 @@ export const manifest = setupManifest({
   marketingUrl: 'https://github.com/ggml-org/llama.cpp',
   donationUrl: null,
   description: { short, long },
-  volumes: ['main'],
+  volumes: ['main', 'public'],
   images: {
     'llama-cpp': mutable(
       imageConfigs[variant as keyof typeof imageConfigs] ??

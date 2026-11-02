@@ -1,8 +1,15 @@
+import { utils } from '@start9labs/start-sdk'
+
 export const apiPort = 8080
 
 export const apiHostId = 'api-multi'
 
+export const apiKeyHostId = 'api-key'
+
 export const uiUsername = 'admin'
+
+export const generateApiKey = () =>
+  utils.getDefaultString({ charset: 'a-z,A-Z,0-9', len: 32 })
 
 export const variant = (process.env.VARIANT || 'generic') as
   | 'generic'
