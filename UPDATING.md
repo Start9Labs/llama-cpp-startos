@@ -58,13 +58,10 @@ Check that each image index includes every architecture declared for that varian
 
 ## Version representation
 
-The prebuilt containers are upstream development builds identified by `bNNNN`, not the official release-mode binaries. The stable `vX.Y.Z` tag selects the commit to package; the build tag identifies the artifact actually included. ExVer cannot represent the leading `b`, so map `bNNNN` to `NNNN:<revision>`, retaining the complete build counter. For example, the containers at the `v0.6.0` commit are `b11429`, represented as `11429:0`. Keep both identifiers in the release notes.
-
-Earlier packages used the synthetic `1.0.NNNN` mapping. Do not continue it: the build-number representation retains every upstream component and sorts above those legacy versions. Leave historical migration vertices at their original versions.
+Map the build tag `bNNNN` to the version `NNNN:<revision>`, keeping the complete build counter: the containers at the `v0.6.0` commit are `b11429`, represented as `11429:0`. Keep both identifiers in the release notes. Do not continue the legacy `1.0.NNNN` mapping, and leave historical migration vertices at their original versions.
 
 ## Applying the bump
 
 1. Update `const upstreamBuild` in `startos/manifest/index.ts` to the stable release's build tag (e.g. `'b11429'` for `v0.6.0`) — the one you confirmed all four variants and their architectures for above.
-2. Set `version` in `startos/versions/current.ts` to `<build-number>:0`. Edit in place unless the **outgoing** current version carries a nonempty migration; in that case move it into a historical file and register it before writing a fresh `current.ts`. A migration introduced by this bump belongs in the new `current.ts`.
-3. Classify the jump using the release policy and `maintaining-a-package.md` § Scale scrutiny. Read notes and source only to the depth that tier requires. For release notes, summarize changes since the actual pinned build, not features already present from the previous stable release's range. Link both the stable release (`https://github.com/ggml-org/llama.cpp/releases/tag/vX.Y.Z`) and the build comparison.
-4. Build and verify at least the `generic` variant: `make generic`.
+2. Set `version` in `startos/versions/current.ts` to `<build-number>:0`.
+3. In the release notes, summarize changes since the actual pinned build, not features already present from the previous stable release's range. Link both the stable release (`https://github.com/ggml-org/llama.cpp/releases/tag/vX.Y.Z`) and the build comparison.
