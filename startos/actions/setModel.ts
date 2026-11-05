@@ -55,8 +55,8 @@ function serveTarget(store: Store | null): ServeTarget | null {
 }
 
 // The cached file the target refers to. An explicit `-hff` wins; otherwise the
-// quant tag picks the first file containing `<QUANT>.` or `<QUANT>-`, the same
-// match llama-server uses to resolve `repo:QUANT` (find_best_model in
+// quant tag matches a full token, excluding BF16 for F16, as llama-server
+// resolves `repo:QUANT` (find_best_model in
 // common/download.cpp). Without a tag, only a single cached file resolves.
 function targetFile(
   target: ServeTarget,
@@ -66,7 +66,7 @@ function targetFile(
   const files = cached.filter((c) => c.repo === target.repo).map((c) => c.file)
   if (target.quant) {
     const tag = target.quant.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    const pattern = new RegExp(`${tag}[.-]`, 'i')
+    const pattern = new RegExp(`(^|[-./])${tag}[.-]`, 'i')
     return files.find((f) => pattern.test(f))
   }
   return files.length === 1 ? files[0] : undefined
