@@ -19,7 +19,7 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
     apiPort,
     {
       protocol: 'http',
-      addSsl: {
+      proxy: {
         auth: {
           type: 'basic',
           credentials: [{ username: uiUsername, password }],
@@ -52,7 +52,7 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
       apiKeyHostId,
     ).bindPort(apiPort, {
       protocol: 'http',
-      addSsl: {
+      proxy: {
         auth: { type: 'bearer', tokens: [apiKey], realm: null },
       },
     })

@@ -35,6 +35,8 @@
 
 ## Image and Container Runtime
 
+Requires StartOS 0.4.1 or later.
+
 The upstream image runs with its CA store upgraded by the root `Dockerfile` (a temporary layer that comes out once upstream ships an image built on a fixed store). **The package is built four times** — one variant per accelerator — and StartOS installs whichever matches your hardware. Images are pinned to the upstream build at a stable release's commit; the package's upstream version is that build number with the `b` prefix removed.
 
 | Variant   | Upstream image | Architectures   | Selected when                                |
@@ -86,6 +88,8 @@ Nothing else writes the file, and neither `serveArgs` nor `uiPassword` is defaul
 
 `credentials.json` on the `public` volume holds one key, `apiKey`: the Bearer token for the OpenAI-compatible API interface. Init generates it (32 alphanumeric characters) whenever it is missing — on install, on update from a version without it, or after it is deleted — so it is never empty while the service runs.
 
+Quant tags match whole tokens when identifying cached weights: `F16` does not select a `BF16` file.
+
 `modelSelection` holds the chosen `selection` plus a `custom` object with the last Custom submission's fields; picking another entry leaves `custom` in place so Custom stays prefilled. `modelSettings` is a list of `{hfRepo, hfFile, ctx, ngl, extraArgs}`, one per model, replaced on each submit of that model. Entries are matched to the list by the weights they resolve to — the same cached file, or the same quant tag before download — so a Custom model keeps its settings once it shows up as a downloaded entry. Stores from before `modelSettings` fall back to `modelSelection.custom`. The daemon reads neither, so they cannot disagree with `serveArgs` about what is actually running — at worst they prefill a form with a stale answer.
 
 **No configuration file reaches the application.** Two environment variables are set, both redirecting caches onto the volume so downloaded weights survive a container rebuild:
@@ -110,7 +114,7 @@ Two interfaces, on two hosts that both forward to llama-server's internal port 8
 | Web UI                | `api`        | `api-multi` | ui   | 8080          | Basic, `admin` + `uiPassword`            |
 | OpenAI-compatible API | `openai-api` | `api-key`   | api  | 8080          | Bearer, `apiKey` from `credentials.json` |
 
-**Authentication is added by StartOS, not by llama.cpp.** The server itself runs keyless. Since StartOS 0.4.1 the proxy enforces a binding's auth on its plaintext bridge address (`10.0.3.1:<port>`) as well as on the LAN, so other services are challenged like any other client. Browsers can only answer a Basic challenge and OpenAI clients only send a Bearer key, which is why there are two hosts.
+**Authentication is added by StartOS, not by llama.cpp.** Each binding sets `proxy.auth`; TLS uses the HTTP protocol's default wrapper. The server itself runs keyless. Since StartOS 0.4.1 the proxy enforces a binding's auth on its plaintext bridge address (`10.0.3.1:<port>`) as well as on the LAN, so other services are challenged like any other client. Browsers can only answer a Basic challenge and OpenAI clients only send a Bearer key, which is why there are two hosts.
 
 - **Web UI:** until a password is set the binding is configured with an empty one — which never serves anything, because the service is blocked from starting by a `critical` task at the same time.
 - **OpenAI-compatible API:** the binding exists only once the key does; init creates it before the interfaces are set. Dependent services resolve this host's bridge address (`apiKeyHostId`, `apiPort` from `startos/utils.ts`) and read the key from the `public` volume. A key of the wrong type or value gets `401` with `WWW-Authenticate: Bearer`.

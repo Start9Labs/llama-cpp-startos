@@ -7,6 +7,8 @@
 
 ## What you get on StartOS
 
+Requires StartOS 0.4.1 or later.
+
 - The upstream chat UI on the **Web UI** interface — open it in a browser to chat without setting up a client. It asks for a login (username `admin`).
 - An OpenAI-compatible HTTP API on the **OpenAI-compatible API** interface, at `<interface-url>/v1`, serving one GGUF model at a time. It takes an API key instead of a login. Other StartOS AI apps that connect to llama.cpp (such as Open WebUI) read the key themselves, so there is nothing to copy.
 - Curated GGUF presets, plus a Custom option that accepts any HuggingFace GGUF repo.
