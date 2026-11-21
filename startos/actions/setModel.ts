@@ -167,7 +167,7 @@ const customVariant = {
     hfRepo: Value.text({
       name: i18n('HuggingFace repo'),
       description: i18n(
-        'A HuggingFace GGUF repo, optionally with a quant tag (e.g. unsloth/Qwen2.5-7B-Instruct-GGUF:Q4_K_M).',
+        'A HuggingFace GGUF repo, optionally with a quant tag (e.g. Qwen/Qwen2.5-7B-Instruct-GGUF:Q4_K_M).',
       ),
       required: true,
       default: null,

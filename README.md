@@ -218,6 +218,7 @@ The `main` and `public` volumes are backed up — `sdk.Backups.ofVolumes('main',
 8. **Models are excluded from backups.** After a restore, the selected model downloads again on first start.
 9. **Downloaded models are listed by repo and file.** A cached file matching a curated preset's quant is not duplicated; other quants from the same repo remain separate entries. Settings are remembered per model, so deleting a model with Delete Model Cache and downloading it again keeps them.
 10. **Saved inference states are upstream-version-specific.** Custom `--slot-save-path` caches may need to be recreated after an update; the package does not convert them. This does not affect downloaded GGUF weights or `store.json`.
+11. **A model's HuggingFace repo must stay public.** If its publisher withdraws or gates it, `llama-server` logs `get_repo_commit: error: GET failed (401)` and fails to start unless that model's weights are already cached. Choose another preset or a public repo in Set Model.
 
 ---
 
