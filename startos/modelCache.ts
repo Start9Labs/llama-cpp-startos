@@ -1,5 +1,5 @@
 import { lstat, readdir, stat } from 'node:fs/promises'
-import { basename, join } from 'node:path'
+import { basename, dirname, join } from 'node:path'
 import { sdk } from './sdk'
 
 // llama-server's LLAMA_CACHE (see main.ts), as seen from the action.
@@ -119,6 +119,28 @@ function isModelStart(file: string): boolean {
   return !split || Number(split[2]) <= 1 || Number(split[1]) === 1
 }
 
+const isFile = (path: string) =>
+  stat(path).then(
+    (info) => info.isFile(),
+    (e: NodeJS.ErrnoException) => {
+      if (e.code === 'ENOENT') return false
+      throw e
+    },
+  )
+
+// A split model counts only with every part on disk: an interrupted download
+// leaves the first part without the rest.
+async function isComplete(path: string) {
+  const split = basename(path).match(/^(.+-)00001-of-([0-9]{5})(\.gguf)$/i)
+  if (!split) return isFile(path)
+  const [, stem, total, ext] = split
+  for (let part = 1; part <= Number(total); part++) {
+    const name = `${stem}${String(part).padStart(5, '0')}-of-${total}${ext}`
+    if (!(await isFile(join(dirname(path), name)))) return false
+  }
+  return true
+}
+
 async function snapshotFiles(
   path: string,
   files: Set<string>,
@@ -131,16 +153,8 @@ async function snapshotFiles(
     const info = await lstat(child)
     if (info.isDirectory()) {
       await snapshotFiles(child, files, file)
-    } else if (isModelStart(file)) {
-      if (info.isFile()) {
-        files.add(file)
-      } else if (info.isSymbolicLink()) {
-        try {
-          if ((await stat(child)).isFile()) files.add(file)
-        } catch (e: any) {
-          if (e.code !== 'ENOENT') throw e
-        }
-      }
+    } else if (isModelStart(file) && (await isComplete(child))) {
+      files.add(file)
     }
   }
 }

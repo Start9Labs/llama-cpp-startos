@@ -63,6 +63,10 @@ export default {
     58: 'Clave de API',
     59: 'Muestra la clave de la interfaz API compatible con OpenAI o genera una nueva.',
     60: 'Envíe esta clave como "Authorization: Bearer <clave>" a la interfaz API compatible con OpenAI. En la mayoría de los clientes, establezca la URL base en la dirección de esa interfaz con /v1 añadido y pegue esto como clave de API.',
+    61: 'Eliminar los demás modelos descargados',
+    62: 'Elimina todos los modelos descargados excepto el seleccionado aquí y su modelo borrador, liberando su espacio en disco. Un modelo eliminado se vuelve a descargar si lo selecciona más adelante.',
+    63: 'Los modelos descargados ocupan ${size} de disco.',
+    64: 'Se eliminó ${model}, que el preset seleccionado ya no usa.',
   },
   de_DE: {
     0: 'Starte llama.cpp!',
@@ -126,6 +130,10 @@ export default {
     58: 'API-Schlüssel',
     59: 'Zeigt den Schlüssel für die OpenAI-kompatible API-Schnittstelle an oder erzeugt einen neuen.',
     60: 'Senden Sie diesen Schlüssel als „Authorization: Bearer <Schlüssel>“ an die OpenAI-kompatible API-Schnittstelle. In den meisten Clients setzen Sie die Basis-URL auf die Adresse dieser Schnittstelle mit angehängtem /v1 und fügen dies als API-Schlüssel ein.',
+    61: 'Andere heruntergeladene Modelle löschen',
+    62: 'Entfernt alle heruntergeladenen Modelle außer dem hier ausgewählten und seinem Entwurfsmodell und gibt ihren Speicherplatz frei. Ein gelöschtes Modell wird erneut heruntergeladen, wenn Sie es später auswählen.',
+    63: 'Heruntergeladene Modelle belegen ${size} Speicherplatz.',
+    64: '${model} wurde entfernt, da das ausgewählte Preset es nicht mehr verwendet.',
   },
   pl_PL: {
     0: 'Uruchamianie llama.cpp!',
@@ -189,6 +197,10 @@ export default {
     58: 'Klucz API',
     59: 'Pokazuje klucz do interfejsu API zgodnego z OpenAI lub generuje nowy.',
     60: 'Wysyłaj ten klucz jako „Authorization: Bearer <klucz>” do interfejsu API zgodnego z OpenAI. W większości klientów ustaw bazowy URL na adres tego interfejsu z dopisanym /v1 i wklej to jako klucz API.',
+    61: 'Usuń pozostałe pobrane modele',
+    62: 'Usuwa wszystkie pobrane modele oprócz wybranego tutaj i jego modelu szkicowego, zwalniając miejsce na dysku. Usunięty model zostanie pobrany ponownie, jeśli wybierzesz go później.',
+    63: 'Pobrane modele zajmują ${size} na dysku.',
+    64: 'Usunięto ${model}, którego wybrany preset już nie używa.',
   },
   fr_FR: {
     0: 'Démarrage de llama.cpp !',
@@ -252,5 +264,9 @@ export default {
     58: 'Clé d’API',
     59: 'Affiche la clé de l’interface API compatible OpenAI, ou en génère une nouvelle.',
     60: 'Envoyez cette clé sous la forme « Authorization: Bearer <clé> » à l’interface API compatible OpenAI. Dans la plupart des clients, définissez l’URL de base sur l’adresse de cette interface suivie de /v1 et collez ceci comme clé d’API.',
+    61: 'Supprimer les autres modèles téléchargés',
+    62: 'Supprime tous les modèles téléchargés sauf celui sélectionné ici et son modèle brouillon, libérant leur espace disque. Un modèle supprimé est retéléchargé si vous le sélectionnez plus tard.',
+    63: 'Les modèles téléchargés occupent ${size} d’espace disque.',
+    64: '${model} a été supprimé, car le préréglage sélectionné ne l’utilise plus.',
   },
 } satisfies Record<string, LangDict>

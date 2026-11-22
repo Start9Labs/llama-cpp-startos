@@ -4,6 +4,7 @@ import type { ModelRef } from './fileModels/store.json'
 import {
   isCached,
   parseTarget,
+  repoFolderName,
   sameModel,
   type CachedModel,
   type ServeTarget,
@@ -109,4 +110,44 @@ export function serveArgsOf(
 ) {
   const target = refTarget(store?.model, cached)
   return target && [...targetArgs(target), ...(store?.settingsArgs ?? [])]
+}
+
+type SavedModel = { model?: ModelRef; settingsArgs?: string[] }
+
+// Cache folders of the main and draft models, last flag winning as in
+// llama-server, plus every cached repo of a selected preset, since a download
+// can change which one the next start resolves to.
+export function cacheEntriesInUse(
+  store: SavedModel | null | undefined,
+  cached: CachedModel[],
+) {
+  const serveArgs = serveArgsOf(store, cached) ?? []
+  const repos = [hfRepoFlags, hfDraftRepoFlags]
+    .map((flags) => lastOptionValue(serveArgs, flags)?.split(':')[0])
+    .filter((repo): repo is string => Boolean(repo))
+  const candidates = refTargets(store?.model)
+    .filter((target) => isCached(target, cached))
+    .map((target) => target.repo)
+  return new Set([...repos, ...candidates].map(repoFolderName))
+}
+
+// Cache folders of a selected preset's former repos once its current repo is
+// cached: nothing resolves to them again. A folder that also holds other
+// files, or serves as the draft model, is kept.
+export function supersededCopies(
+  store: SavedModel | null | undefined,
+  cached: CachedModel[],
+) {
+  const [current, ...former] = refTargets(store?.model)
+  if (!store?.model?.preset || !current || !isCached(current, cached)) return []
+  const draft = lastOptionValue(store.settingsArgs ?? [], hfDraftRepoFlags)
+  return former
+    .filter(
+      (target) =>
+        target.repo !== draft?.split(':')[0] &&
+        cached
+          .filter((c) => c.repo === target.repo)
+          .every((c) => sameModel(c, target, cached)),
+    )
+    .map((target) => repoFolderName(target.repo))
 }

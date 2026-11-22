@@ -1,16 +1,26 @@
+import { rm } from 'node:fs/promises'
+import { join } from 'node:path'
 import { T } from '@start9labs/start-sdk'
 import { i18n } from '../i18n'
 import { sdk } from '../sdk'
 import { storeJson, type ModelRef } from '../fileModels/store.json'
 import { detectHardware } from '../hardware'
 import {
+  cacheDir,
+  formatBytes,
+  listCacheEntries,
   listCachedModels,
   parseTarget,
   repoFolderName,
   targetFile,
   type CachedModel,
 } from '../modelCache'
-import { isGpuVariant, matchingPreset, sameRef } from '../utils'
+import {
+  cacheEntriesInUse,
+  isGpuVariant,
+  matchingPreset,
+  sameRef,
+} from '../utils'
 import { models } from './presets'
 
 const { InputSpec, Value, Variants } = sdk
@@ -139,6 +149,10 @@ const inputSpec = InputSpec.of({
     // Anything already on disk can be selected again without re-downloading.
     // Preset files are left out because their entry is already in the list.
     const allCached = await listCachedModels()
+    const cacheBytes = (await listCacheEntries()).reduce(
+      (total, e) => total + e.bytes,
+      0,
+    )
     const cached = allCached.filter((c) => !matchingPreset(c, allCached))
     // Label by repo alone when it has one cached file; append the file only
     // when a repo has several, where it is needed to tell them apart.
@@ -211,11 +225,26 @@ const inputSpec = InputSpec.of({
             `- ${i18n(m.displayName)}: ${i18n('needs about ${memory} GB of memory', { memory: m.minMemoryGB })}`,
         ),
         `- ${i18n('Custom')}: ${i18n('any HuggingFace GGUF model, with your own context size, GPU layers and server flags')}`,
+        ...(cacheBytes > 0
+          ? [
+              '',
+              i18n('Downloaded models use ${size} of disk.', {
+                size: formatBytes(cacheBytes),
+              }),
+            ]
+          : []),
       ].join('\n'),
       variants: Variants.of(variants),
       default: defaultId as string,
       disabled: disabledIds.length > 0 ? disabledIds : false,
     }
+  }),
+  deleteOthers: Value.toggle({
+    name: i18n('Delete other downloaded models'),
+    description: i18n(
+      'Remove every downloaded model except the one selected here and its draft model, freeing their disk space. A deleted model downloads again if you select it later.',
+    ),
+    default: false,
   }),
 })
 
@@ -340,9 +369,10 @@ export const setModel = sdk.Action.withInput(
       hfRepo: model.hfRepo,
       hfFile: model.hfFile,
     }
+    const settingsArgs = settingsArgsFor(settings)
     await storeJson.merge(effects, {
       model: modelRef,
-      settingsArgs: settingsArgsFor(settings),
+      settingsArgs,
       modelSelection: {
         selection: config.selection,
         custom:
@@ -357,5 +387,12 @@ export const setModel = sdk.Action.withInput(
         { ...modelRef, ...settings },
       ],
     })
+
+    if (input.deleteOthers) {
+      const keep = cacheEntriesInUse({ model: modelRef, settingsArgs }, cached)
+      for (const { name } of await listCacheEntries()) {
+        if (!keep.has(name)) await rm(join(cacheDir, name), { recursive: true })
+      }
+    }
   },
 )
