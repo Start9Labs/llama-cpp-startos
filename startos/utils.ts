@@ -53,25 +53,24 @@ const presetTargets = (preset: ModelPreset) => [
   ...(preset.formerRepos ?? []).map((repo) => parseTarget(repo)),
 ]
 
-// The current repo, unless only a former one has the weights cached.
-function presetTarget(preset: ModelPreset, cached: CachedModel[]) {
-  const [current, ...former] = presetTargets(preset)
-  if (isCached(current, cached)) return current
-  return former.find((t) => isCached(t, cached)) ?? current
-}
-
 export const matchingPreset = (target: ServeTarget, cached: CachedModel[]) =>
   models.find((m) => presetTargets(m).some((t) => sameModel(target, t, cached)))
 
+export function refTargets(ref: ModelRef | null | undefined): ServeTarget[] {
+  if (ref?.preset) {
+    const preset = models.find((m) => m.id === ref.preset)
+    return preset ? presetTargets(preset) : []
+  }
+  return ref?.hfRepo ? [parseTarget(ref.hfRepo, ref.hfFile)] : []
+}
+
+// The current repo, unless only a former one has the weights cached.
 export function refTarget(
   ref: ModelRef | null | undefined,
   cached: CachedModel[],
 ): ServeTarget | undefined {
-  if (ref?.preset) {
-    const preset = models.find((m) => m.id === ref.preset)
-    return preset && presetTarget(preset, cached)
-  }
-  return ref?.hfRepo ? parseTarget(ref.hfRepo, ref.hfFile) : undefined
+  const targets = refTargets(ref)
+  return targets.find((t) => isCached(t, cached)) ?? targets[0]
 }
 
 // Whether two saved refs name the same model: a preset matches its own id

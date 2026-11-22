@@ -70,7 +70,9 @@ Map the build tag `bNNNN` to the version `NNNN:<revision>`, keeping the complete
    ```sh
    grep -o "hfRepo: '[^']*'" startos/actions/presets.ts | cut -d"'" -f2 | while IFS=: read -r repo quant; do
      json=$(curl -sf "https://huggingface.co/api/models/$repo") || { echo "UNAVAILABLE $repo"; continue; }
-     jq -r '.siblings[].rfilename' <<<"$json" | grep -qi -- "$quant" \
+     printf '%s' "$json" | jq -e '.private == false and .gated == false' >/dev/null \
+       || { echo "NOT PUBLIC/UNGATED $repo"; continue; }
+     printf '%s' "$json" | jq -r '.siblings[].rfilename' | grep -qi -- "$quant" \
        && echo "OK $repo:$quant" || echo "NO $quant FILE $repo"
    done
    ```

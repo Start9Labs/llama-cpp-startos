@@ -173,7 +173,7 @@ Shows the Bearer key for the OpenAI-compatible API interface.
 Removes one downloaded model to reclaim disk.
 
 - **What it changes:** deletes the chosen `models--<org>--<repo>` folder from `/data/models` — every quantization downloaded from that repo goes with it. The form lists the cached repos with their size on disk, plus any loose `*.gguf` files left by older builds; it never takes a free-form path, and nothing is preselected.
-- **Models in use cannot be deleted.** The main and speculative draft repos the server is started with are disabled in the form and refused if submitted. Repeated HuggingFace options use the last value, matching llama-server. llama-server holds these models open, so the space would not come back until a restart, and the restart would download them again. Switch models with Set Model first.
+- **Models in use cannot be deleted.** The main and speculative draft repos the server is started with are disabled in the form and refused if submitted. A selected preset also protects cached copies of its current and former repos until another model is selected: a download can change which repo a future start would choose without changing the running server. Repeated HuggingFace options use the last value, matching llama-server. llama-server holds these models open, so the space would not come back until a restart, and the restart would download them again. Switch models with Set Model first.
 - **Repeat safety:** fails with an error if the chosen model is no longer in the cache, rather than reporting success.
 - **Outputs:** the repo removed and the space freed.
 - **Not reversible**, but not destructive either — the model is re-downloaded if selected again.

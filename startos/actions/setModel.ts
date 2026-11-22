@@ -324,9 +324,15 @@ export const setModel = sdk.Action.withInput(
       }
       model = { preset: config.selection }
     }
-    // Already the running model: keep it as it was saved, so unchanged
-    // settings write identical values and do not restart.
-    if (running && sameRef(running, model, cached)) model = running
+    // Cached selections keep their running repo/file; Custom honors its input.
+    if (
+      config.selection.startsWith(cachedPrefix) &&
+      running &&
+      !running.preset &&
+      sameRef(running, model, cached)
+    ) {
+      model = running
+    }
 
     // Every key is written so a preset and a repo never mix in the merge.
     const modelRef = {

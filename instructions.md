@@ -48,7 +48,7 @@ curl -s -H "Authorization: Bearer <your-api-key>" <api-interface-url>/v1/chat/co
 - **Set Model** — switch to a different preset, a model you already downloaded, or a custom GGUF. The form opens on the model you are running, with its settings filled in, so you can change its context size or flags and submit; submitting without changes does not restart anything. Each model remembers its own settings, so switching away and back keeps them. The service restarts with the new weights; uncached models download on this restart.
 - **Set UI Password** — generate a new web UI password (username stays `admin`). Use it for first-time setup or to rotate the password later; when rotating, it asks you to confirm, since saved logins stop working.
 - **API Key** — show the key for the OpenAI-compatible API interface. Turn on **Generate a new key** to replace it; clients outside StartOS then need the new key, and StartOS apps pick it up when they restart.
-- **Delete Model Cache** — pick a downloaded model from the list, with its size, and remove it to reclaim disk space. The model you are currently running can't be deleted; switch to another one with Set Model first. A deleted model will be re-downloaded if you select it again.
+- **Delete Model Cache** — pick a downloaded model from the list, with its size, and remove it to reclaim disk space. The model you are currently running can't be deleted; a selected preset protects its cached copies from both current and former publishers. Switch to another model with Set Model first. A deleted model will be re-downloaded if you select it again.
 
 ## Limitations
 

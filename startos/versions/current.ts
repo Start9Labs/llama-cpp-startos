@@ -1,7 +1,8 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 import { storeJson, type ModelRef } from '../fileModels/store.json'
-import { listCachedModels, parseTarget } from '../modelCache'
-import { hfFileFlags, hfRepoFlags, matchingPreset } from '../utils'
+import { models } from '../actions/presets'
+import { listCachedModels, parseTarget, sameModel } from '../modelCache'
+import { hfFileFlags, hfRepoFlags, matchingPreset, refTargets } from '../utils'
 
 export const current = VersionInfo.of({
   version: '12110:1',
@@ -30,19 +31,38 @@ export const current = VersionInfo.of({
         // Every earlier release wrote `-hf <repo> [-hff <file>]` first.
         const modelEnd = hfFileFlags.includes(serveArgs[2]) ? 4 : 2
         const hasModel = hfRepoFlags.includes(serveArgs[0]) && !!serveArgs[1]
+        const legacyTarget = hasModel
+          ? parseTarget(serveArgs[1], modelEnd === 4 ? serveArgs[3] : undefined)
+          : undefined
+        // The saved preset id survives backups that omit cached weights.
+        const selectedPreset = models.find(
+          (m) =>
+            m.id === store.modelSelection?.selection &&
+            refTargets({ preset: m.id }).some(
+              (t) => t.repo === legacyTarget?.repo,
+            ),
+        )
+        const model = legacyTarget
+          ? selectedPreset
+            ? { preset: selectedPreset.id }
+            : toRef(serveArgs[1], legacyTarget.file)
+          : rest.model
         return {
           ...rest,
-          model: hasModel
-            ? toRef(serveArgs[1], modelEnd === 4 ? serveArgs[3] : undefined)
-            : rest.model,
+          model,
           settingsArgs: hasModel
             ? serveArgs.slice(modelEnd)
             : rest.settingsArgs,
           modelSettings: store.modelSettings?.map(
-            ({ preset, hfRepo, hfFile, ...settings }) => ({
-              ...(hfRepo ? toRef(hfRepo, hfFile) : { preset }),
-              ...settings,
-            }),
+            ({ preset, hfRepo, hfFile, ...settings }) => {
+              const ref = hfRepo ? toRef(hfRepo, hfFile) : { preset }
+              const isSelected =
+                hfRepo &&
+                model &&
+                legacyTarget &&
+                sameModel(parseTarget(hfRepo, hfFile), legacyTarget, cached)
+              return { ...(isSelected ? model : ref), ...settings }
+            },
           ),
         }
       })
