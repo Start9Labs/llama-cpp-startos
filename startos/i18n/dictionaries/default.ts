@@ -2,6 +2,7 @@ export const DEFAULT_LANG = 'en_US'
 
 const dict = {
   // main.ts
+  'Removed ${model}, which the selected preset no longer uses.': 64,
   'Starting llama.cpp!': 0,
   'llama.cpp API': 1,
   'The llama.cpp API is ready': 2,
@@ -34,6 +35,9 @@ const dict = {
   'needs about ${memory} GB of memory': 47,
   'any HuggingFace GGUF model, with your own context size, GPU layers and server flags': 48,
   'That downloaded model is no longer in the cache.': 53,
+  'Delete other downloaded models': 61,
+  'Remove every downloaded model except the one selected here and its draft model, freeing their disk space. A deleted model downloads again if you select it later.': 62,
+  'Downloaded models use ${size} of disk.': 63,
 
   // model preset labels
   'Llama 3.2 1B Instruct': 22,

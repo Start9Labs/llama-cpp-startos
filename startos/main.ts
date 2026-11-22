@@ -1,18 +1,34 @@
 import { i18n } from './i18n'
 import { sdk } from './sdk'
 import { storeJson } from './fileModels/store.json'
-import { listCachedModels } from './modelCache'
-import { apiPort, serveArgsOf } from './utils'
+import { rm } from 'node:fs/promises'
+import { join } from 'node:path'
+import {
+  cacheDir,
+  entryLabel,
+  listCachedModels,
+  readdirSafe,
+} from './modelCache'
+import { apiPort, serveArgsOf, supersededCopies } from './utils'
 
 export const main = sdk.setupMain(async ({ effects }) => {
   console.info(i18n('Starting llama.cpp!'))
 
-  const serveArgs = serveArgsOf(
-    await storeJson
-      .read((s) => ({ model: s?.model, settingsArgs: s?.settingsArgs }))
-      .const(effects),
-    await listCachedModels(),
-  )
+  const store = await storeJson
+    .read((s) => ({ model: s?.model, settingsArgs: s?.settingsArgs }))
+    .const(effects)
+  const cached = await listCachedModels()
+  const onDisk = await readdirSafe(cacheDir)
+  for (const name of supersededCopies(store, cached)) {
+    if (!onDisk.includes(name)) continue
+    await rm(join(cacheDir, name), { recursive: true })
+    console.info(
+      i18n('Removed ${model}, which the selected preset no longer uses.', {
+        model: entryLabel(name),
+      }),
+    )
+  }
+  const serveArgs = serveArgsOf(store, cached)
 
   const subcontainer = sdk.SubContainer.of(
     effects,
