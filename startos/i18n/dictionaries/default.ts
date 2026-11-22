@@ -20,7 +20,7 @@ const dict = {
   'Changing the model will restart the service and may require downloading a new model.': 9,
   Configuration: 10,
   'HuggingFace repo': 11,
-  'A HuggingFace GGUF repo, optionally with a quant tag (e.g. unsloth/Qwen2.5-7B-Instruct-GGUF:Q4_K_M).': 12,
+  'A HuggingFace GGUF repo, optionally with a quant tag (e.g. Qwen/Qwen2.5-7B-Instruct-GGUF:Q4_K_M).': 12,
   'HuggingFace file (optional)': 13,
   'Specific GGUF filename inside the repo. Leave empty to let llama-server pick.': 14,
   'Context size': 15,

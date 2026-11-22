@@ -65,3 +65,16 @@ Map the build tag `bNNNN` to the version `NNNN:<revision>`, keeping the complete
 1. Update `const upstreamBuild` in `startos/manifest/index.ts` to the stable release's build tag (e.g. `'b11429'` for `v0.6.0`) — the one you confirmed all four variants and their architectures for above.
 2. Set `version` in `startos/versions/current.ts` to `<build-number>:0`.
 3. In the release notes, summarize changes since the actual pinned build, not features already present from the previous stable release's range. Link both the stable release (`https://github.com/ggml-org/llama.cpp/releases/tag/vX.Y.Z`) and the build comparison.
+4. Confirm every Set Model preset still downloads. A HuggingFace publisher can withdraw a repo at any time, and llama-server then fails to start for anyone who picks that preset without its weights cached. Run from the repo root; every line must read `OK`:
+
+   ```sh
+   grep -o "hfRepo: '[^']*'" startos/actions/presets.ts | cut -d"'" -f2 | while IFS=: read -r repo quant; do
+     json=$(curl -sf "https://huggingface.co/api/models/$repo") || { echo "UNAVAILABLE $repo"; continue; }
+     printf '%s' "$json" | jq -e '.private == false and .gated == false' >/dev/null \
+       || { echo "NOT PUBLIC/UNGATED $repo"; continue; }
+     printf '%s' "$json" | jq -r '.siblings[].rfilename' | grep -qi -- "$quant" \
+       && echo "OK $repo:$quant" || echo "NO $quant FILE $repo"
+   done
+   ```
+
+   For a failing preset, point `hfRepo` at a public, ungated repo carrying the same model at the same quant, preferring the model publisher's own GGUF repo, and add the old `repo:QUANT` to the preset's `formerRepos`. Saved selections follow on their next start; no migration is needed.

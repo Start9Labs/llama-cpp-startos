@@ -6,11 +6,19 @@ import {
   cacheDir,
   entryLabel,
   formatBytes,
+  isCached,
   listCacheEntries,
+  listCachedModels,
   repoFolderName,
 } from '../modelCache'
 import { sdk } from '../sdk'
-import { hfDraftRepoFlags, hfRepoFlags, lastOptionValue } from '../utils'
+import {
+  hfDraftRepoFlags,
+  hfRepoFlags,
+  lastOptionValue,
+  refTargets,
+  serveArgsOf,
+} from '../utils'
 
 const { InputSpec, Value } = sdk
 
@@ -18,11 +26,17 @@ const { InputSpec, Value } = sdk
 // as in llama-server. It keeps them open, so deleting one would free nothing
 // until a restart, which downloads it again.
 async function inUseEntries(): Promise<Set<string>> {
-  const serveArgs = (await storeJson.read((s) => s?.serveArgs).once()) ?? []
+  const store = await storeJson.read().once()
+  const cached = await listCachedModels()
+  const serveArgs = serveArgsOf(store, cached) ?? []
   const repos = [hfRepoFlags, hfDraftRepoFlags]
     .map((flags) => lastOptionValue(serveArgs, flags)?.split(':')[0])
     .filter((repo): repo is string => Boolean(repo))
-  return new Set(repos.map(repoFolderName))
+  // Cache changes must not make a running preset's repo deletable.
+  const candidates = refTargets(store?.model)
+    .filter((target) => isCached(target, cached))
+    .map((target) => target.repo)
+  return new Set([...repos, ...candidates].map(repoFolderName))
 }
 
 const inputSpec = InputSpec.of({

@@ -79,18 +79,21 @@ Two models. Two of `store.json`'s keys decide whether the service can run at all
 
 | Key              | Notes                                                                                           |
 | ---------------- | ----------------------------------------------------------------------------------------------- |
-| `serveArgs`      | The full argument list handed to `llama-server`, composed by the Set Model action               |
+| `model`          | The model to serve: `{preset}` for a curated preset, `{hfRepo, hfFile}` for anything else       |
+| `settingsArgs`   | The `llama-server` flags after the model's own (context, GPU layers, extras), from Set Model    |
 | `uiPassword`     | The password for the proxy's basic auth; the username is always `admin`                         |
 | `modelSelection` | What the Set Model form last submitted, so it can be prefilled next time — read by nothing else |
 | `modelSettings`  | Context size, GPU layers and extra flags last used for each model — read only by Set Model      |
 
-Nothing else writes the file, and neither `serveArgs` nor `uiPassword` is defaulted — both are absent until you run their action, and each absence raises a task.
+Nothing else writes the file, and neither `model` nor `uiPassword` is defaulted — both are absent until you run their action, and each absence raises a task.
 
 `credentials.json` on the `public` volume holds one key, `apiKey`: the Bearer token for the OpenAI-compatible API interface. Init generates it (32 alphanumeric characters) whenever it is missing — on install, on update from a version without it, or after it is deleted — so it is never empty while the service runs.
 
 Quant tags match whole tokens when identifying cached weights: `F16` does not select a `BF16` file.
 
-`modelSelection` holds the chosen `selection` plus a `custom` object with the last Custom submission's fields; picking another entry leaves `custom` in place so Custom stays prefilled. `modelSettings` is a list of `{hfRepo, hfFile, ctx, ngl, extraArgs}`, one per model, replaced on each submit of that model. Entries are matched to the list by the weights they resolve to — the same cached file, or the same quant tag before download — so a Custom model keeps its settings once it shows up as a downloaded entry. Stores from before `modelSettings` fall back to `modelSelection.custom`. The daemon reads neither, so they cannot disagree with `serveArgs` about what is actually running — at worst they prefill a form with a stale answer.
+`modelSelection` holds the chosen `selection` plus a `custom` object with the last Custom submission's fields; picking another entry leaves `custom` in place so Custom stays prefilled. `modelSettings` is a list of `{preset}` or `{hfRepo, hfFile}` entries with `ctx`, `ngl` and `extraArgs`, one per model, replaced on each submit of that model. A preset entry matches its preset; a repo entry matches by the weights it resolves to — the same cached file, or the same quant tag before download — so a Custom model keeps its settings once it shows up as a downloaded entry, and one that is a preset's quant counts as that preset. Stores from before `modelSettings` fall back to `modelSelection.custom`. The daemon reads neither, so they cannot disagree with `model` about what is actually running — at worst they prefill a form with a stale answer.
+
+**A preset's repo is resolved at every start, never saved.** `main.ts` looks the preset up in `startos/actions/presets.ts` and serves its `hfRepo`, unless those weights are not cached and a repo in its `formerRepos` has them cached, in which case it serves that one. A preset whose upstream repo is withdrawn therefore moves to its replacement on the next start for everyone without the old weights, restores included, while a server that already downloaded it keeps using its copy: llama-server falls back to cached files when HuggingFace refuses the repo.
 
 **No configuration file reaches the application.** Two environment variables are set, both redirecting caches onto the volume so downloaded weights survive a container rebuild:
 
@@ -99,7 +102,7 @@ Quant tags match whole tokens when identifying cached weights: `F16` does not se
 | `LLAMA_CACHE` | `/data/models`      |
 | `HF_HOME`     | `/data/huggingface` |
 
-Everything else about how the model is served is in `serveArgs`, and the package always appends the host and port itself so the server binds where the interface expects it.
+Everything else about how the model is served is in `settingsArgs`, and the package always appends the host and port itself so the server binds where the interface expects it.
 
 ## Dependencies
 
@@ -138,11 +141,11 @@ Four actions, all user-facing.
 
 Chooses what the server runs — either a curated preset or a model of your own.
 
-- **What it changes:** `serveArgs` and `modelSelection` in `store.json`, replacing each entirely, and the chosen model's entry in `modelSettings`.
+- **What it changes:** `model`, `settingsArgs` and `modelSelection` in `store.json`, replacing each entirely, and the chosen model's entry in `modelSettings`.
 - **Cost:** seconds to write, then a restart — and, if the model is not already cached, a download that can take a long time.
 - **Repeat safety:** safe to re-run. Switching back to a previously used model is fast, because the old one is still cached.
 - **Every entry has its own context size, GPU layers and extra flags**, prefilled with what that model last ran with (`modelSettings`), or with the preset's context and full GPU offload the first time. Switching to another model and back keeps them.
-- **The form reopens on the running model**, which stays selectable: change its settings and submit to restart with them. Submitting it unchanged writes the same `serveArgs` and does not restart. With nothing chosen yet the form falls back to the hardware-filtered default.
+- **The form reopens on the running model**, which stays selectable: change its settings and submit to restart with them. Submitting it unchanged writes the same `model` and `settingsArgs` and does not restart. With nothing chosen yet the form falls back to the hardware-filtered default.
 - **Presets are filtered to your hardware.** The form reads the accelerator's memory — VRAM on NVIDIA and ROCm, system memory otherwise — and disables any preset that would not fit, defaulting to the smallest that does. The field's help text lists every preset with the memory it needs. The estimate is the quantized weights plus roughly a quarter for the context cache.
 - **Models already downloaded to the volume appear in the same list**, so a model you fetched before can be reselected without retyping its repo or re-downloading it. A downloaded file that is a preset's quant stays under that preset, while other quants of the same repo get their own entries. A downloaded entry is passed to `llama-server` as `-hf <org>/<repo> -hff <file>` so the exact cached quant is reused; a first-time downloaded entry defaults to an 8192-token context. When the entry is the running model, its repo and file arguments are kept as they were written.
 - **Custom** takes a HuggingFace GGUF repo, optionally a specific file, a context size, a GPU-layer count, and extra server flags. Those extra flags are split on whitespace, so a quoted value with spaces will not survive.
@@ -170,7 +173,7 @@ Shows the Bearer key for the OpenAI-compatible API interface.
 Removes one downloaded model to reclaim disk.
 
 - **What it changes:** deletes the chosen `models--<org>--<repo>` folder from `/data/models` — every quantization downloaded from that repo goes with it. The form lists the cached repos with their size on disk, plus any loose `*.gguf` files left by older builds; it never takes a free-form path, and nothing is preselected.
-- **Models in use cannot be deleted.** The main and speculative draft repos configured in `serveArgs` are disabled in the form and refused if submitted. Repeated HuggingFace options use the last value, matching llama-server. llama-server holds these models open, so the space would not come back until a restart, and the restart would download them again. Switch models with Set Model first.
+- **Models in use cannot be deleted.** The main and speculative draft repos the server is started with are disabled in the form and refused if submitted. A selected preset also protects cached copies of its current and former repos until another model is selected: a download can change which repo a future start would choose without changing the running server. Repeated HuggingFace options use the last value, matching llama-server. llama-server holds these models open, so the space would not come back until a restart, and the restart would download them again. Switch models with Set Model first.
 - **Repeat safety:** fails with an error if the chosen model is no longer in the cache, rather than reporting success.
 - **Outputs:** the repo removed and the space freed.
 - **Not reversible**, but not destructive either — the model is re-downloaded if selected again.
@@ -218,6 +221,7 @@ The `main` and `public` volumes are backed up — `sdk.Backups.ofVolumes('main',
 8. **Models are excluded from backups.** After a restore, the selected model downloads again on first start.
 9. **Downloaded models are listed by repo and file.** A cached file matching a curated preset's quant is not duplicated; other quants from the same repo remain separate entries. Settings are remembered per model, so deleting a model with Delete Model Cache and downloading it again keeps them.
 10. **Saved inference states are upstream-version-specific.** Custom `--slot-save-path` caches may need to be recreated after an update; the package does not convert them. This does not affect downloaded GGUF weights or `store.json`.
+11. **A Custom or downloaded model's HuggingFace repo must stay public.** If its publisher withdraws or gates it, `llama-server` logs `get_repo_commit: error: GET failed (401)` and fails to start unless that model's weights are already cached. Choose another model in Set Model. Presets are moved to a public repo by a package update instead.
 
 ---
 

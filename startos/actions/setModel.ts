@@ -1,20 +1,17 @@
 import { T } from '@start9labs/start-sdk'
 import { i18n } from '../i18n'
 import { sdk } from '../sdk'
-import { storeJson } from '../fileModels/store.json'
+import { storeJson, type ModelRef } from '../fileModels/store.json'
 import { detectHardware } from '../hardware'
 import {
   listCachedModels,
+  parseTarget,
   repoFolderName,
+  targetFile,
   type CachedModel,
 } from '../modelCache'
-import {
-  hfFileFlags,
-  hfRepoFlags,
-  isGpuVariant,
-  lastOptionValue,
-} from '../utils'
-import { models, type ModelPreset } from './presets'
+import { isGpuVariant, matchingPreset, sameRef } from '../utils'
+import { models } from './presets'
 
 const { InputSpec, Value, Variants } = sdk
 
@@ -25,75 +22,23 @@ const defaultNgl = 999
 const cachedId = (repo: string, file: string) =>
   `${cachedPrefix}${repoFolderName(repo)}:${file}`
 
-type ServeTarget = { repo: string; quant?: string; file?: string }
-
 type ModelSettings = { ctx: number; ngl: number; extraArgs?: string }
 
-type SavedSettings = ModelSettings & { hfRepo: string; hfFile?: string }
+type SavedSettings = ModelSettings & ModelRef
 
 type Store = NonNullable<Awaited<ReturnType<typeof readStore>>>
 
 const readStore = (effects: T.Effects) => storeJson.read().const(effects)
 
-// `repo:QUANT` plus an optional explicit file, as given to `-hf`/`-hff`.
-function parseTarget(hfRepo: string, hfFile?: string): ServeTarget {
-  const [repo, quant] = hfRepo.split(':')
-  return { repo, quant: quant || undefined, file: hfFile || undefined }
-}
-
-const presetTarget = (model: ModelPreset) =>
-  parseTarget(model.hfRepo, model.hfFile)
-
-// The repo, optional quant tag, and optional explicit file the daemon was last
-// started with. Custom entries are written as `repo:QUANT` with no `-hff`, so
-// the quant tag is what identifies the running file.
-function serveTarget(store: Store | null): ServeTarget | null {
-  const serveArgs = store?.serveArgs ?? []
-  const repoArg = lastOptionValue(serveArgs, hfRepoFlags)
-  if (!repoArg) return null
-  return parseTarget(repoArg, lastOptionValue(serveArgs, hfFileFlags))
-}
-
-// The cached file the target refers to. An explicit `-hff` wins; otherwise the
-// quant tag matches a full token, excluding BF16 for F16, as llama-server
-// resolves `repo:QUANT` (find_best_model in
-// common/download.cpp). Without a tag, only a single cached file resolves.
-function targetFile(
-  target: ServeTarget,
-  cached: CachedModel[],
-): string | undefined {
-  if (target.file) return target.file
-  const files = cached.filter((c) => c.repo === target.repo).map((c) => c.file)
-  if (target.quant) {
-    const tag = target.quant.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    const pattern = new RegExp(`(^|[-./])${tag}[.-]`, 'i')
-    return files.find((f) => pattern.test(f))
-  }
-  return files.length === 1 ? files[0] : undefined
-}
-
-// Whether two targets name the same weights: the same cached file once both
-// resolve to one, otherwise the same quant tag with no explicit file.
-function sameModel(a: ServeTarget, b: ServeTarget, cached: CachedModel[]) {
-  if (a.repo !== b.repo) return false
-  const fileA = targetFile(a, cached)
-  const fileB = targetFile(b, cached)
-  if (fileA && fileB) return fileA === fileB
-  return (
-    !a.file &&
-    !b.file &&
-    (a.quant ?? '').toLowerCase() === (b.quant ?? '').toLowerCase()
-  )
-}
-
-function matchingPreset(target: ServeTarget, cached: CachedModel[]) {
-  return models.find((model) => sameModel(target, presetTarget(model), cached))
-}
+const cachedRef = (c: CachedModel): ModelRef => ({
+  hfRepo: c.repo,
+  hfFile: c.file,
+})
 
 // The settings this model was last run with. Stores written before
 // `modelSettings` existed only have the last Custom submission.
 function settingsFor(
-  target: ServeTarget,
+  ref: ModelRef,
   store: Store | null,
   cached: CachedModel[],
 ): ModelSettings | undefined {
@@ -101,9 +46,7 @@ function settingsFor(
     ...(store?.modelSelection?.custom ? [store.modelSelection.custom] : []),
     ...(store?.modelSettings ?? []),
   ]
-  const saved = candidates
-    .filter((s) => sameModel(target, parseTarget(s.hfRepo, s.hfFile), cached))
-    .pop()
+  const saved = candidates.filter((s) => sameRef(s, ref, cached)).pop()
   return saved && { ctx: saved.ctx, ngl: saved.ngl, extraArgs: saved.extraArgs }
 }
 
@@ -112,10 +55,14 @@ function settingsFor(
 // entry, so the running model shows up once rather than as a duplicate next to
 // a Custom.
 function inUseVariantId(
-  target: ServeTarget | null,
+  ref: ModelRef | undefined,
   cached: CachedModel[],
 ): string | null {
-  if (!target) return null
+  if (ref?.preset) {
+    return models.some((m) => m.id === ref.preset) ? ref.preset : null
+  }
+  if (!ref?.hfRepo) return null
+  const target = parseTarget(ref.hfRepo, ref.hfFile)
   const preset = matchingPreset(target, cached)
   if (preset) return preset.id
   const file = targetFile(target, cached)
@@ -167,7 +114,7 @@ const customVariant = {
     hfRepo: Value.text({
       name: i18n('HuggingFace repo'),
       description: i18n(
-        'A HuggingFace GGUF repo, optionally with a quant tag (e.g. unsloth/Qwen2.5-7B-Instruct-GGUF:Q4_K_M).',
+        'A HuggingFace GGUF repo, optionally with a quant tag (e.g. Qwen/Qwen2.5-7B-Instruct-GGUF:Q4_K_M).',
       ),
       required: true,
       default: null,
@@ -208,7 +155,7 @@ const inputSpec = InputSpec.of({
             : c.repo,
         spec: InputSpec.of(
           settingsFields(
-            settingsFor(c, store, allCached) ?? {
+            settingsFor(cachedRef(c), store, allCached) ?? {
               ctx: cachedCtx,
               ngl: defaultNgl,
             },
@@ -225,7 +172,7 @@ const inputSpec = InputSpec.of({
             name: i18n(m.displayName),
             spec: InputSpec.of(
               settingsFields(
-                settingsFor(presetTarget(m), store, allCached) ?? {
+                settingsFor({ preset: m.id }, store, allCached) ?? {
                   ctx: m.defaultCtx,
                   ngl: defaultNgl,
                 },
@@ -240,7 +187,7 @@ const inputSpec = InputSpec.of({
 
     // The running model stays selectable so its settings can be changed;
     // submitting it unchanged writes the same arguments and does not restart.
-    const inUseId = inUseVariantId(serveTarget(store), allCached)
+    const inUseId = inUseVariantId(store?.model, allCached)
     const enabledIds = new Set<string>([
       ...enabledPresets.map((m) => m.id),
       ...cachedVariants.map(([id]) => id as string),
@@ -279,19 +226,14 @@ const settingsValue = (s: ModelSettings) => ({
   extraArgs: s.extraArgs ?? null,
 })
 
-function serveArgsFor(
-  hfRepo: string,
-  hfFile: string | undefined,
-  settings: ModelSettings,
-): string[] {
-  const serveArgs = ['-hf', hfRepo]
-  if (hfFile) serveArgs.push('-hff', hfFile)
-  if (settings.ctx > 0) serveArgs.push('-c', String(settings.ctx))
-  if (isGpuVariant) serveArgs.push('-ngl', String(settings.ngl))
+function settingsArgsFor(settings: ModelSettings): string[] {
+  const args: string[] = []
+  if (settings.ctx > 0) args.push('-c', String(settings.ctx))
+  if (isGpuVariant) args.push('-ngl', String(settings.ngl))
   if (settings.extraArgs) {
-    serveArgs.push(...settings.extraArgs.split(/\s+/).filter(Boolean))
+    args.push(...settings.extraArgs.split(/\s+/).filter(Boolean))
   }
-  return serveArgs
+  return args
 }
 
 export const setModel = sdk.Action.withInput(
@@ -315,13 +257,13 @@ export const setModel = sdk.Action.withInput(
   async ({ effects }) => {
     const store = await readStore(effects)
     const cached = await listCachedModels()
-    const target = serveTarget(store)
-    const inUseId = inUseVariantId(target, cached)
+    const running = store?.model
+    const inUseId = inUseVariantId(running, cached)
     const saved = store?.modelSelection
     // Keep the Custom fields around so switching to Custom is still prefilled.
     const other = saved?.custom ? { other: { custom: saved.custom } } : {}
-    if (target && inUseId) {
-      const settings = settingsFor(target, store, cached)
+    if (running && inUseId) {
+      const settings = settingsFor(running, store, cached)
       return {
         config: {
           selection: inUseId,
@@ -335,10 +277,10 @@ export const setModel = sdk.Action.withInput(
     if (selection === 'custom') {
       return { config: { selection, value: saved.custom ?? {} } }
     }
-    const preset = models.find((m) => m.id === selection)
-    const selected = preset
-      ? presetTarget(preset)
-      : cached.find((c) => cachedId(c.repo, c.file) === selection)
+    const match = cached.find((c) => cachedId(c.repo, c.file) === selection)
+    const selected = models.some((m) => m.id === selection)
+      ? { preset: selection }
+      : match && cachedRef(match)
     if (!selected) return {}
     const settings = settingsFor(selected, store, cached)
     return {
@@ -354,61 +296,66 @@ export const setModel = sdk.Action.withInput(
     const config = input.config
     const store = await storeJson.read().once()
     const cached = await listCachedModels()
-    const running = serveTarget(store)
+    const running = store?.model
     const settings: ModelSettings = {
       ctx: config.value.ctx,
       ngl: config.value.ngl,
       extraArgs: config.value.extraArgs?.trim() || undefined,
     }
-    let hfRepo: string
-    let hfFile: string | undefined
+    let model: ModelRef
     if (config.selection === 'custom') {
-      hfRepo = config.value.hfRepo.trim()
-      hfFile = config.value.hfFile?.trim() || undefined
-    } else {
-      let target: ServeTarget
-      if (config.selection.startsWith(cachedPrefix)) {
-        const match = cached.find(
-          (c) => cachedId(c.repo, c.file) === config.selection,
-        )
-        if (!match) {
-          throw new Error(
-            i18n('That downloaded model is no longer in the cache.'),
-          )
-        }
-        target = match
-      } else {
-        const preset = models.find((m) => m.id === config.selection)
-        if (!preset) {
-          throw new Error(`Unknown preset: ${config.selection}`)
-        }
-        target = presetTarget(preset)
+      model = {
+        hfRepo: config.value.hfRepo.trim(),
+        hfFile: config.value.hfFile?.trim() || undefined,
       }
-      // Already the running model: keep the repo and file arguments as they
-      // were written, so unchanged settings yield identical serveArgs and no
-      // restart.
-      if (running && sameModel(running, target, cached)) target = running
-      hfRepo = target.quant ? `${target.repo}:${target.quant}` : target.repo
-      hfFile = target.file
+    } else if (config.selection.startsWith(cachedPrefix)) {
+      const match = cached.find(
+        (c) => cachedId(c.repo, c.file) === config.selection,
+      )
+      if (!match) {
+        throw new Error(
+          i18n('That downloaded model is no longer in the cache.'),
+        )
+      }
+      model = cachedRef(match)
+    } else {
+      if (!models.some((m) => m.id === config.selection)) {
+        throw new Error(`Unknown preset: ${config.selection}`)
+      }
+      model = { preset: config.selection }
+    }
+    // Cached selections keep their running repo/file; Custom honors its input.
+    if (
+      config.selection.startsWith(cachedPrefix) &&
+      running &&
+      !running.preset &&
+      sameRef(running, model, cached)
+    ) {
+      model = running
     }
 
-    const newTarget = parseTarget(hfRepo, hfFile)
-    const modelSettings: SavedSettings[] = [
-      ...(store?.modelSettings ?? []).filter(
-        (s) => !sameModel(parseTarget(s.hfRepo, s.hfFile), newTarget, cached),
-      ),
-      { hfRepo, hfFile, ...settings },
-    ]
+    // Every key is written so a preset and a repo never mix in the merge.
+    const modelRef = {
+      preset: model.preset,
+      hfRepo: model.hfRepo,
+      hfFile: model.hfFile,
+    }
     await storeJson.merge(effects, {
-      serveArgs: serveArgsFor(hfRepo, hfFile, settings),
+      model: modelRef,
+      settingsArgs: settingsArgsFor(settings),
       modelSelection: {
         selection: config.selection,
         custom:
-          config.selection === 'custom'
-            ? { hfRepo, hfFile, ...settings }
+          config.selection === 'custom' && model.hfRepo
+            ? { hfRepo: model.hfRepo, hfFile: model.hfFile, ...settings }
             : store?.modelSelection?.custom,
       },
-      modelSettings,
+      modelSettings: [
+        ...(store?.modelSettings ?? []).filter(
+          (s) => !sameRef(s, model, cached),
+        ),
+        { ...modelRef, ...settings },
+      ],
     })
   },
 )
