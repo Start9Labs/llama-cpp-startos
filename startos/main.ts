@@ -1,12 +1,18 @@
 import { i18n } from './i18n'
 import { sdk } from './sdk'
 import { storeJson } from './fileModels/store.json'
-import { apiPort } from './utils'
+import { listCachedModels } from './modelCache'
+import { apiPort, serveArgsOf } from './utils'
 
 export const main = sdk.setupMain(async ({ effects }) => {
   console.info(i18n('Starting llama.cpp!'))
 
-  const serveArgs = await storeJson.read((s) => s?.serveArgs).const(effects)
+  const serveArgs = serveArgsOf(
+    await storeJson
+      .read((s) => ({ model: s?.model, settingsArgs: s?.settingsArgs }))
+      .const(effects),
+    await listCachedModels(),
+  )
 
   const subcontainer = sdk.SubContainer.of(
     effects,

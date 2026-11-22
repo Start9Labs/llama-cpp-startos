@@ -75,4 +75,4 @@ Map the build tag `bNNNN` to the version `NNNN:<revision>`, keeping the complete
    done
    ```
 
-   For a failing preset, point `hfRepo` at a public, ungated repo carrying the same model at the same quant, preferring the model publisher's own GGUF repo, and migrate a saved selection of the old repo that has no cached weights onto the new one, as version `12110:1` does.
+   For a failing preset, point `hfRepo` at a public, ungated repo carrying the same model at the same quant, preferring the model publisher's own GGUF repo, and add the old `repo:QUANT` to the preset's `formerRepos`. Saved selections follow on their next start; no migration is needed.

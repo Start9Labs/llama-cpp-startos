@@ -7,10 +7,16 @@ import {
   entryLabel,
   formatBytes,
   listCacheEntries,
+  listCachedModels,
   repoFolderName,
 } from '../modelCache'
 import { sdk } from '../sdk'
-import { hfDraftRepoFlags, hfRepoFlags, lastOptionValue } from '../utils'
+import {
+  hfDraftRepoFlags,
+  hfRepoFlags,
+  lastOptionValue,
+  serveArgsOf,
+} from '../utils'
 
 const { InputSpec, Value } = sdk
 
@@ -18,7 +24,8 @@ const { InputSpec, Value } = sdk
 // as in llama-server. It keeps them open, so deleting one would free nothing
 // until a restart, which downloads it again.
 async function inUseEntries(): Promise<Set<string>> {
-  const serveArgs = (await storeJson.read((s) => s?.serveArgs).once()) ?? []
+  const serveArgs =
+    serveArgsOf(await storeJson.read().once(), await listCachedModels()) ?? []
   const repos = [hfRepoFlags, hfDraftRepoFlags]
     .map((flags) => lastOptionValue(serveArgs, flags)?.split(':')[0])
     .filter((repo): repo is string => Boolean(repo))

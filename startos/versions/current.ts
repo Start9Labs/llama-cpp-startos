@@ -1,15 +1,7 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
-import { storeJson } from '../fileModels/store.json'
-import { listCachedModels } from '../modelCache'
-import { hfRepoFlags, lastOptionValue } from '../utils'
-
-const withdrawnRepos: Record<string, string> = {
-  'unsloth/Qwen2.5-7B-Instruct-GGUF': 'Qwen/Qwen2.5-7B-Instruct-GGUF',
-  'unsloth/Qwen2.5-14B-Instruct-GGUF': 'Qwen/Qwen2.5-14B-Instruct-GGUF',
-  'unsloth/Qwen2.5-32B-Instruct-GGUF': 'Qwen/Qwen2.5-32B-Instruct-GGUF',
-  'unsloth/Meta-Llama-3.1-8B-Instruct-GGUF':
-    'bartowski/Meta-Llama-3.1-8B-Instruct-GGUF',
-}
+import { storeJson, type ModelRef } from '../fileModels/store.json'
+import { listCachedModels, parseTarget } from '../modelCache'
+import { hfFileFlags, hfRepoFlags, matchingPreset } from '../utils'
 
 export const current = VersionInfo.of({
   version: '12110:1',
@@ -27,19 +19,32 @@ export const current = VersionInfo.of({
   },
   migrations: {
     up: async ({ effects }) => {
-      const serveArgs = await storeJson.read((s) => s?.serveArgs).once()
-      const repoArg = serveArgs && lastOptionValue(serveArgs, hfRepoFlags)
-      if (!repoArg) return
-      const [repo, quant] = repoArg.split(':')
-      const replacement = withdrawnRepos[repo]
-      if (!replacement) return
-      // llama-server falls back to cached weights when the repo lookup fails.
-      if ((await listCachedModels()).some((c) => c.repo === repo)) return
-      const i = serveArgs.lastIndexOf(repoArg)
-      await storeJson.merge(effects, {
-        serveArgs: serveArgs.map((arg, j) =>
-          j === i ? (quant ? `${replacement}:${quant}` : replacement) : arg,
-        ),
+      const cached = await listCachedModels()
+      const toRef = (hfRepo: string, hfFile?: string): ModelRef => {
+        const preset = matchingPreset(parseTarget(hfRepo, hfFile), cached)
+        return preset ? { preset: preset.id } : { hfRepo, hfFile }
+      }
+      await storeJson.update(effects, (store) => {
+        if (!store) return null
+        const { serveArgs = [], ...rest } = store
+        // Every earlier release wrote `-hf <repo> [-hff <file>]` first.
+        const modelEnd = hfFileFlags.includes(serveArgs[2]) ? 4 : 2
+        const hasModel = hfRepoFlags.includes(serveArgs[0]) && !!serveArgs[1]
+        return {
+          ...rest,
+          model: hasModel
+            ? toRef(serveArgs[1], modelEnd === 4 ? serveArgs[3] : undefined)
+            : rest.model,
+          settingsArgs: hasModel
+            ? serveArgs.slice(modelEnd)
+            : rest.settingsArgs,
+          modelSettings: store.modelSettings?.map(
+            ({ preset, hfRepo, hfFile, ...settings }) => ({
+              ...(hfRepo ? toRef(hfRepo, hfFile) : { preset }),
+              ...settings,
+            }),
+          ),
+        }
       })
     },
     down: IMPOSSIBLE,

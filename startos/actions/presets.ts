@@ -7,6 +7,8 @@ export type ModelPreset = {
   hfRepo: string
   /** Optional explicit GGUF filename — overrides the implicit quant tag. */
   hfFile?: string
+  /** Repos this preset served before, still used when their weights are cached. */
+  formerRepos?: string[]
   /** Quantized weights size plus headroom (KV cache, activations) in GiB. */
   minMemoryGB: number
   /** Conservative default context window. */
@@ -36,6 +38,7 @@ export const models: ModelPreset[] = [
     id: 'qwen25-7b',
     displayName: 'Qwen2.5 7B Instruct',
     hfRepo: 'Qwen/Qwen2.5-7B-Instruct-GGUF:Q4_K_M',
+    formerRepos: ['unsloth/Qwen2.5-7B-Instruct-GGUF:Q4_K_M'],
     minMemoryGB: 6,
     defaultCtx: 8192,
   },
@@ -43,6 +46,7 @@ export const models: ModelPreset[] = [
     id: 'llama-31-8b',
     displayName: 'Llama 3.1 8B Instruct',
     hfRepo: 'bartowski/Meta-Llama-3.1-8B-Instruct-GGUF:Q4_K_M',
+    formerRepos: ['unsloth/Meta-Llama-3.1-8B-Instruct-GGUF:Q4_K_M'],
     minMemoryGB: 8,
     defaultCtx: 8192,
   },
@@ -50,6 +54,7 @@ export const models: ModelPreset[] = [
     id: 'qwen25-14b',
     displayName: 'Qwen2.5 14B Instruct',
     hfRepo: 'Qwen/Qwen2.5-14B-Instruct-GGUF:Q4_K_M',
+    formerRepos: ['unsloth/Qwen2.5-14B-Instruct-GGUF:Q4_K_M'],
     minMemoryGB: 12,
     defaultCtx: 8192,
   },
@@ -71,6 +76,7 @@ export const models: ModelPreset[] = [
     id: 'qwen25-32b',
     displayName: 'Qwen2.5 32B Instruct',
     hfRepo: 'Qwen/Qwen2.5-32B-Instruct-GGUF:Q4_K_M',
+    formerRepos: ['unsloth/Qwen2.5-32B-Instruct-GGUF:Q4_K_M'],
     minMemoryGB: 24,
     defaultCtx: 8192,
   },
