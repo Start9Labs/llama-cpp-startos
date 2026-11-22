@@ -43,7 +43,11 @@ export const hfDraftRepoFlags = [
 export function lastOptionValue(args: string[], flags: string[]) {
   let value: string | undefined
   for (let i = 0; i < args.length; i++) {
-    if (flags.includes(args[i])) value = args[++i]
+    // llama-server accepts underscores in long option names.
+    const flag = args[i].startsWith('--')
+      ? args[i].replaceAll('_', '-')
+      : args[i]
+    if (flags.includes(flag)) value = args[++i]
   }
   return value
 }
@@ -114,10 +118,9 @@ export function serveArgsOf(
 
 type SavedModel = { model?: ModelRef; settingsArgs?: string[] }
 
-// Cache folders of the main and draft models, last flag winning as in
-// llama-server, plus every cached repo of a selected preset, since a download
-// can change which one the next start resolves to.
-export function cacheEntriesInUse(
+// Cache folders of the main and draft repos llama-server will load: the last
+// flag wins, so an override in the extra arguments counts.
+function effectiveCacheEntries(
   store: SavedModel | null | undefined,
   cached: CachedModel[],
 ) {
@@ -125,26 +128,35 @@ export function cacheEntriesInUse(
   const repos = [hfRepoFlags, hfDraftRepoFlags]
     .map((flags) => lastOptionValue(serveArgs, flags)?.split(':')[0])
     .filter((repo): repo is string => Boolean(repo))
-  const candidates = refTargets(store?.model)
-    .filter((target) => isCached(target, cached))
-    .map((target) => target.repo)
-  return new Set([...repos, ...candidates].map(repoFolderName))
+  return new Set(repos.map(repoFolderName))
+}
+
+// Those, plus every cached repo of a selected preset, since a download can
+// change which one the next start resolves to.
+export function cacheEntriesInUse(
+  store: SavedModel | null | undefined,
+  cached: CachedModel[],
+) {
+  const entries = effectiveCacheEntries(store, cached)
+  for (const target of refTargets(store?.model)) {
+    if (isCached(target, cached)) entries.add(repoFolderName(target.repo))
+  }
+  return entries
 }
 
 // Cache folders of a selected preset's former repos once its current repo is
-// cached: nothing resolves to them again. A folder that also holds other
-// files, or serves as the draft model, is kept.
+// cached. A folder that also holds other files, or is loaded anyway, is kept.
 export function supersededCopies(
   store: SavedModel | null | undefined,
   cached: CachedModel[],
 ) {
   const [current, ...former] = refTargets(store?.model)
   if (!store?.model?.preset || !current || !isCached(current, cached)) return []
-  const draft = lastOptionValue(store.settingsArgs ?? [], hfDraftRepoFlags)
+  const inUse = effectiveCacheEntries(store, cached)
   return former
     .filter(
       (target) =>
-        target.repo !== draft?.split(':')[0] &&
+        !inUse.has(repoFolderName(target.repo)) &&
         cached
           .filter((c) => c.repo === target.repo)
           .every((c) => sameModel(c, target, cached)),
